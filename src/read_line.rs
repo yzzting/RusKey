@@ -1,43 +1,50 @@
+use std::process;
+
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
 
-pub fn read_line(url: &str) -> Result<String> {
+pub fn read_line(url: &str) -> Result<()> {
     let mut rl = DefaultEditor::new()?;
-    #[cfg(feature = "with-file-history")]
     if rl.load_history("history.txt").is_err() {
         println!("No previous history.");
     }
-    let mut input = String::new();
     loop {
         match rl.readline(format!("{} RusKey >", url).as_str()) {
             Ok(line) => {
-            println!("input: {}", line);
+                rl.save_history("history.txt")?;
+                println!("input: {}", line);
                 match rl.add_history_entry(line.as_str()) {
-                    Ok(_) => {},
+                    Ok(_) => {}
                     Err(err) => {
                         println!("Error: {:?}", err);
                         return Err(err);
-                    },
+                    }
                 };
-                input = line;
-            },
+
+                // handle input
+                match line.trim() {
+                    "quit" | "exit" => {
+                        println!("Exiting RusKey");
+                        process::exit(0);
+                    }
+                    "ping" => {
+                        println!("pong");
+                    }
+                    _ => {}
+                }
+            }
             Err(ReadlineError::Interrupted) => {
                 println!("Command-C");
-                break
-            },
+                process::exit(0);
+            }
             Err(ReadlineError::Eof) => {
                 println!("Command-D");
-                break
-            },
+                process::exit(0);
+            }
             Err(err) => {
                 println!("Error: {:?}", err);
                 return Err(err);
-            },
+            }
         }
     }
-
-    #[cfg(feature = "with-file-history")]
-    rl.save_history("history.txt")?;
-
-    Ok(input)
 }
