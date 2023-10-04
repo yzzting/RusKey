@@ -1,14 +1,20 @@
 mod net;
 mod db;
 mod cmd;
+mod args;
 
 use std::net::TcpListener;
 use crate::db::Db;
 use crate::net::handle_client;
+use clap::Parser;
+use crate::args::Opt;
 
 fn main() {
+    let opt = Opt::parse();
     let mut db = Db::new();
-    let listener = TcpListener::bind("127.0.0.1:16379").unwrap();
+    let listener = TcpListener::bind(format!("{}:{}", opt.host, opt.port)).unwrap();
+
+    println!("rus key start {}:{}", opt.host, opt.port);
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
@@ -17,5 +23,4 @@ fn main() {
             println!("Failed to handle client: {}", e);
         }
     }
-    println!("rus key start!");
 }
