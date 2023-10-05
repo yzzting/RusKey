@@ -4,6 +4,8 @@ use std::str::SplitAsciiWhitespace;
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
     let cmd = parts.next();
     match cmd {
+        Some("PING") => Ok("PONG\r\n".to_string()),
+
         Some("GET") => {
             if let Some(key) = parts.next() {
                 let value = db.get(key).unwrap_or(&db.not_found_message);

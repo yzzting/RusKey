@@ -3,6 +3,7 @@ mod db;
 mod cmd;
 mod args;
 mod read_line;
+mod func;
 
 use tokio::net::TcpListener;
 use crate::db::Db;
@@ -19,9 +20,11 @@ async fn main() {
 
     println!("rus key start {}:{}", opt.host, opt.port);
 
-    if let Err(e) = read_line(&url) {
-        println!("Error: {:?}", e);
-    }
+    tokio::spawn(async move {
+        if let Err(e) = read_line(&url).await {
+            println!("Error: {:?}", e);
+        }
+    });
 
     loop {
         let (stream, _) = listener.accept().await.unwrap();

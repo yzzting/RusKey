@@ -1,18 +1,14 @@
 use std::process;
-
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
 
-pub fn read_line(url: &str) -> Result<()> {
+use crate::func::ping::ping;
+
+pub async fn read_line(url: &str) -> Result<()> {
     let mut rl = DefaultEditor::new()?;
-    if rl.load_history("history.txt").is_err() {
-        println!("No previous history.");
-    }
     loop {
         match rl.readline(format!("{} RusKey >", url).as_str()) {
             Ok(line) => {
-                rl.save_history("history.txt")?;
-                println!("input: {}", line);
                 match rl.add_history_entry(line.as_str()) {
                     Ok(_) => {}
                     Err(err) => {
@@ -22,13 +18,14 @@ pub fn read_line(url: &str) -> Result<()> {
                 };
 
                 // handle input
-                match line.trim() {
+                let lowercase_line = line.trim().to_lowercase();
+                match &*lowercase_line {
                     "quit" | "exit" => {
                         println!("Exiting RusKey");
                         process::exit(0);
                     }
                     "ping" => {
-                        println!("pong");
+                        ping(&line, &url).await;
                     }
                     _ => {}
                 }
