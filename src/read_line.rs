@@ -19,14 +19,16 @@ pub async fn read_line(url: &str) -> Result<()> {
 
                 // handle input
                 let lowercase_line = line.trim().to_lowercase();
-                match &*lowercase_line {
-                    "quit" | "exit" => {
+                let parts: Vec<&str> = lowercase_line.split_whitespace().collect();
+                match parts.get(0) {
+                    Some(&"quit") | Some(&"exit") => {
                         println!("Exiting RusKey");
                         process::exit(0);
                     }
-                    "ping" => {
-                        ping(&line, &url).await;
-                    }
+                    Some(&"ping") => {
+                        let command = parts.join(" ");
+                       ping( &command, &url).await;
+                     }
                     _ => {}
                 }
             }
