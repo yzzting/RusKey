@@ -7,6 +7,8 @@ use std::time::Duration;
 use std::time::Instant;
 use regex::Regex;
 
+use crate::Store;
+
 const PING_TIMEOUT: u64 = 10; // ping timeout 10 seconds
 
 async fn send_ping(original_command: &str, addr: &str) -> Result<String> {
@@ -42,8 +44,8 @@ async fn send_ping(original_command: &str, addr: &str) -> Result<String> {
     }
 }
 
-pub async fn ping(command: &str, addr: &str) {
-    match send_ping(command, addr).await {
+pub async fn ping(command: &str, state: &Store) {
+    match send_ping(command, &state.url).await {
         Ok(response) => {
             println!("Received: {}", response);
         }

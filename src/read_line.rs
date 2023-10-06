@@ -2,12 +2,14 @@ use std::process;
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
 
+use crate::Store;
 use crate::func::ping::ping;
+use crate::func::string::set::set_string;
 
-pub async fn read_line(url: &str) -> Result<()> {
+pub async fn read_line(state: &Store) -> Result<()> {
     let mut rl = DefaultEditor::new()?;
     loop {
-        match rl.readline(format!("{} RusKey >", url).as_str()) {
+        match rl.readline(format!("{} RusKey >", state.url).as_str()) {
             Ok(line) => {
                 match rl.add_history_entry(line.as_str()) {
                     Ok(_) => {}
@@ -27,9 +29,18 @@ pub async fn read_line(url: &str) -> Result<()> {
                     }
                     Some(&"ping") => {
                         let command = parts.join(" ");
-                        ping(&command, &url).await;
+                        ping(&command, &state).await;
                     }
-                    _ => {}
+                    Some(&"get") => {
+                        println!("get");
+                    }
+                    Some(&"set") => {
+                        println!("set");
+                        set_string(&parts.join(" "), &state);
+                    }
+                    _ => {
+                        println!("Invalid command");
+                    }
                 }
             }
             Err(ReadlineError::Interrupted) => {
