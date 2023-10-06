@@ -3,8 +3,14 @@ use std::str::SplitAsciiWhitespace;
 
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
     let cmd = parts.next();
+    let arg = parts.next();
     match cmd {
-        Some("PING") => Ok("PONG\r\n".to_string()),
+        Some("PING") => {
+            match arg {
+                Some(arg) => Ok(arg.to_string()),
+                None => Ok("PONG".to_string()),
+            }
+        },
 
         Some("GET") => {
             if let Some(key) = parts.next() {

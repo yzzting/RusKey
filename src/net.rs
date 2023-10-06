@@ -23,7 +23,6 @@ pub async fn handle_client(mut stream: TcpStream, db: &mut Db) -> Result<()> {
         let command = str::from_utf8(&buffer[..bytes_read]).unwrap().trim(); // convert bytes to string
 
         let mut parts = command.split_ascii_whitespace(); // split string into parts
-
         match cmd::handle_command(&mut parts, db) {
             Ok(response) => stream.write(response.as_bytes()).await.map_err(|e| {
                 println!("Error: {:?}", e);

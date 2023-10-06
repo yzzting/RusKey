@@ -27,8 +27,8 @@ pub async fn read_line(url: &str) -> Result<()> {
                     }
                     Some(&"ping") => {
                         let command = parts.join(" ");
-                       ping( &command, &url).await;
-                     }
+                        ping(&command, &url).await;
+                    }
                     _ => {}
                 }
             }
