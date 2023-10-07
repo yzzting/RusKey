@@ -5,6 +5,8 @@ mod args;
 mod read_line;
 mod func;
 
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use tokio::net::TcpListener;
 use crate::db::Db;
 use crate::net::handle_client;
@@ -25,6 +27,8 @@ async fn main() {
     println!("rus key start {}:{}", opt.host, opt.port);
 
     let state = Store { url };
+    
+    let db = Arc::new(Mutex::new(Db::new()));
 
     tokio::spawn(async move {
         if let Err(e) = read_line(&state).await {
@@ -35,9 +39,10 @@ async fn main() {
     loop {
         let (stream, _) = listener.accept().await.unwrap();
 
-        let mut db = Db::new();
+        let db = Arc::clone(&db);
         tokio::spawn(async move {
-            if let Err(e) = handle_client(stream, &mut db).await {
+            let mut db_lock = db.lock().await;
+            if let Err(e) = handle_client(stream, &mut *db_lock).await {
                 println!("Error: {:?}", e);
             }
         });
