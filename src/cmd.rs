@@ -18,7 +18,8 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
         },
         // String
         "get" => {
-            if let Some(key) = parts.next() {
+            let key = parts.next();
+            if let Some(key) = key {
                 match db.get(key) {
                     Some(DataType::String(value)) => Ok(value.clone()),
                     _ => Err("No such key or wrong data type"),

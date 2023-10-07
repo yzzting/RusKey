@@ -5,6 +5,7 @@ use rustyline::{DefaultEditor, Result};
 use crate::Store;
 use crate::func::ping::ping;
 use crate::func::string::set::set_string;
+use crate::func::string::get::get_string;
 
 pub async fn read_line(state: &Store) -> Result<()> {
     let mut rl = DefaultEditor::new()?;
@@ -32,10 +33,9 @@ pub async fn read_line(state: &Store) -> Result<()> {
                         ping(&command, &state).await;
                     }
                     Some(&"get") => {
-                        println!("get");
+                        get_string(&parts.join(" "), &state).await;
                     }
                     Some(&"set") => {
-                        println!("set");
                         set_string(&parts.join(" "), &state).await;
                     }
                     _ => {
