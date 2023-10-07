@@ -3,9 +3,19 @@ use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
 
 use crate::Store;
-use crate::func::ping::ping;
-use crate::func::string::set::set_string;
-use crate::func::string::get::get_string;
+use crate::func::stream::Client;
+
+async fn send_command(command: &str, state: &Store) {
+    let mut client = Client::new(&state.url).await.unwrap();
+    match client.send_command(command).await {
+        Ok(response) => {
+            println!("Received: {}", response);
+        }
+        Err(e) => {
+            println!("Error: {:?}", e);
+        }
+    }
+}
 
 pub async fn read_line(state: &Store) -> Result<()> {
     let mut rl = DefaultEditor::new()?;
@@ -30,13 +40,16 @@ pub async fn read_line(state: &Store) -> Result<()> {
                     }
                     Some(&"ping") => {
                         let command = parts.join(" ");
-                        ping(&command, &state).await;
+                        send_command(&command, &state).await;
                     }
                     Some(&"get") => {
-                        get_string(&parts.join(" "), &state).await;
+                        send_command(&parts.join(" "), &state).await;
                     }
                     Some(&"set") => {
-                        set_string(&parts.join(" "), &state).await;
+                        send_command(&parts.join(" "), &state).await;
+                    }
+                    Some(&"hmset") => {
+                        send_command(&parts.join(" "), &state).await;
                     }
                     _ => {
                         println!("Read Invalid command");
