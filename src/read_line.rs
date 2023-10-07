@@ -36,10 +36,10 @@ pub async fn read_line(state: &Store) -> Result<()> {
                     }
                     Some(&"set") => {
                         println!("set");
-                        set_string(&parts.join(" "), &state);
+                        set_string(&parts.join(" "), &state).await;
                     }
                     _ => {
-                        println!("Invalid command");
+                        println!("Read Invalid command");
                     }
                 }
             }

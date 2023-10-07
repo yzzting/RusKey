@@ -1,7 +1,14 @@
 use std::collections::HashMap;
 
+#[derive(Debug)]
+pub enum DataType {
+    String(String),
+    List(Vec<String>),
+    Set(HashMap<String, String>)
+}
+
 pub struct Db {
-    map: HashMap<String, String>,
+    map: HashMap<String, DataType>,
     pub not_found_message: String,
 }
 
@@ -13,11 +20,11 @@ impl Db {
         }
     }
 
-    pub fn set(&mut self, key: String, value: String) {
+    pub fn set(&mut self, key: String, value: DataType) {
         self.map.insert(key, value);
     }
 
-    pub fn get(&self, key: &str) -> Option<&String> {
+    pub fn get(&self, key: &str) -> Option<&DataType> {
         self.map.get(key)
     }
 }

@@ -1,33 +1,43 @@
 use crate::db::Db;
+use crate::db::DataType;
 use std::str::SplitAsciiWhitespace;
 
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
-    let cmd = parts.next();
-    let arg = parts.next();
-    match cmd {
-        Some("PING") => {
+    let cmd = match parts.next() {
+        Some(cmd) => cmd.to_lowercase(),
+        None => return Err("No command"),
+    };
+    match cmd.as_str() {
+        // Connection
+        "ping" => {
+            let arg = parts.next();
             match arg {
                 Some(arg) => Ok(arg.to_string()),
                 None => Ok("PONG".to_string()),
             }
         },
-
-        Some("GET") => {
+        // String
+        "get" => {
             if let Some(key) = parts.next() {
-                let value = db.get(key).unwrap_or(&db.not_found_message);
-                Ok(value.clone())
+                match db.get(key) {
+                    Some(DataType::String(value)) => Ok(value.clone()),
+                    _ => Err("No such key or wrong data type"),
+                }
             } else {
                 Err("No such key")
             }
         },
-        Some("SET") => {
-            if let (Some(key), Some(value)) = (parts.next(), parts.next()) {
-                db.set(key.to_string(), value.to_string());
+
+        "set" => {
+            let key = parts.next();
+            let value = parts.next();
+            if let (Some(key), Some(value)) = (key, value) {
+                db.set(key.to_string(), DataType::String(value.to_string()));
                 Ok("OK".to_string())
             } else {
-                Err("Invalid arguments")
+                Err("Set Error: Key or value not specified")
             }
         },
-        _ => Err("Invalid command"),
+        _ => Err("Invalid command!"),
     }
 }
