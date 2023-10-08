@@ -9,7 +9,7 @@ async fn send_command(command: &str, state: &Store) {
     let mut client = Client::new(&state.url).await.unwrap();
     match client.send_command(command).await {
         Ok(response) => {
-            println!("Received: {}", response);
+            println!("{:?}", response);
         }
         Err(e) => {
             println!("Error: {:?}", e);
@@ -49,6 +49,9 @@ pub async fn read_line(state: &Store) -> Result<()> {
                         send_command(&parts.join(" "), &state).await;
                     }
                     Some(&"hmset") => {
+                        send_command(&parts.join(" "), &state).await;
+                    }
+                    Some(&"hgetall") => {
                         send_command(&parts.join(" "), &state).await;
                     }
                     _ => {

@@ -1,10 +1,11 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeMap};
 
 #[derive(Debug)]
 pub enum DataType {
     String(String),
     List(Vec<String>),
-    Set(HashMap<String, String>)
+    Set(HashMap<String, String>),
+    HashMap(BTreeMap<String, String>),
 }
 
 pub struct Db {

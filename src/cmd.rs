@@ -1,5 +1,6 @@
 use crate::db::Db;
 use crate::db::DataType;
+use std::collections::BTreeMap;
 use std::str::SplitAsciiWhitespace;
 
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
@@ -16,6 +17,7 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                 None => Ok("PONG".to_string()),
             }
         },
+
         // String
         "get" => {
             let key = parts.next();
@@ -39,6 +41,41 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                 Err("Set Error: Key or value not specified")
             }
         },
+        // Hash Map
+
+        "hmset" => {
+            let key = match parts.next() {
+                Some(key) => key,
+                None => return Err("Key not specified"),
+            };
+            let mut btree_map = BTreeMap::new();
+            while let Some(field) = parts.next() {
+                let value = match parts.next() {
+                    Some(value) => value,
+                    None => return Err("Value not specified"),
+                };
+                btree_map.insert(field.to_string(), value.to_string());
+            }
+            db.set(key.to_string(), DataType::HashMap(btree_map));
+            Ok("OK".to_string())
+        }
+
+        "hgetall" => {
+            let key = match parts.next() {
+                Some(key) => key,
+                None => return Err("Key not specified"),
+            };
+            match db.get(key) {
+                Some(DataType::HashMap(btree_map)) => {
+                    let mut result = String::new();
+                    for (field, value) in btree_map {
+                        result.push_str(&format!("{}: {} ", field, value));
+                    }
+                    Ok(result.trim().to_string())
+                }
+                _ => Err("No such key or wrong data type"),
+            }
+        }
         _ => Err("Invalid command!"),
     }
 }
