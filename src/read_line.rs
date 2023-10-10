@@ -1,9 +1,12 @@
 use std::process;
+use std::collections::HashSet;
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
 
 use crate::Store;
 use crate::func::stream::Client;
+
+const COMMANDS: [&str; 6] = ["ping", "config get", "get", "set", "hmset", "hgetall"];
 
 async fn send_command(command: &str, state: &Store) {
     let mut client = Client::new(&state.url).await.unwrap();
@@ -19,6 +22,7 @@ async fn send_command(command: &str, state: &Store) {
 
 pub async fn read_line(state: &Store) -> Result<()> {
     let mut rl = DefaultEditor::new()?;
+    let commands = COMMANDS.iter().cloned().collect::<HashSet<_>>();
     loop {
         match rl.readline(format!("{} RusKey >", state.url).as_str()) {
             Ok(line) => {
@@ -38,20 +42,7 @@ pub async fn read_line(state: &Store) -> Result<()> {
                         println!("Exiting RusKey");
                         process::exit(0);
                     }
-                    Some(&"ping") => {
-                        let command = parts.join(" ");
-                        send_command(&command, &state).await;
-                    }
-                    Some(&"get") => {
-                        send_command(&parts.join(" "), &state).await;
-                    }
-                    Some(&"set") => {
-                        send_command(&parts.join(" "), &state).await;
-                    }
-                    Some(&"hmset") => {
-                        send_command(&parts.join(" "), &state).await;
-                    }
-                    Some(&"hgetall") => {
+                    Some(command) if commands.contains(command) => {
                         send_command(&parts.join(" "), &state).await;
                     }
                     _ => {
