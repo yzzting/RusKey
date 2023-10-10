@@ -1,7 +1,6 @@
-use serde::Deserialize;
 use clap::Parser;
 
-#[derive(Parser, Deserialize, Debug)]
+#[derive(Parser, Debug)]
 #[command(author, version, about, long_about = "rus key is a simple key-value store.", disable_help_flag(true))]
 pub struct Opt {
     #[arg(short, long = "host")]
