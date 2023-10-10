@@ -13,6 +13,7 @@ use crate::db::Db;
 use crate::net::handle_client;
 use clap::Parser;
 use crate::args::Opt;
+use crate::init::Config;
 use crate::read_line::read_line;
 
 pub struct Store {
@@ -23,24 +24,16 @@ pub struct Store {
 async fn main() {
     let db = Arc::new(Mutex::new(Db::new()));
     // init config
-    let config = init::init();
-    db.lock().await.set("ruskey_config".to_string(), db::DataType::HashMap(config.clone()));
-    let mut opt = Opt::parse();
-    // Check if host and port values are present in opt, if not, get from config
-    if opt.host.is_empty() {
-        if let Some(host) = config.get("host") {
-            opt.host = host.clone();
-        }
-    }
-    if opt.port.is_empty() {
-        if let Some(port) = config.get("port") {
-            opt.port = port.clone();
-        }
-    }
-    let url = format!("{}:{}", opt.host, opt.port);
+    let config_map = init::init();
+    db.lock().await.set("ruskey_config".to_string(), db::DataType::HashMap(config_map.clone()));
+    // parse args priority command line > config file
+    let opt = Opt::parse();
+    let config = Config::new(opt, config_map);
+    let host = config.get("host").unwrap_or_else(|| String::from("127.0.0.1"));
+    let port = config.get("port").unwrap_or_else(|| String::from("16379"));
+    let url = format!("{}:{}", host, port);
+    println!("rus key start {}:{}", host, port);
     let listener = TcpListener::bind(url.clone()).await.unwrap();
-
-    println!("rus key start {}:{}", opt.host, opt.port);
 
     let state = Store { url };
     

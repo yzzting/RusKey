@@ -1,6 +1,8 @@
 use std::fs;
 use std::collections::BTreeMap;
 
+use crate::args::Opt;
+
 pub fn init() -> BTreeMap<String, String> {
     // fs read config file ./ruskey.conf
     let content = match fs::read_to_string("./ruskey.conf") {
@@ -29,6 +31,23 @@ pub fn init() -> BTreeMap<String, String> {
         config.insert(key, value);
     }
 
-    println!("config: {:?}", config);
     config
+}
+
+pub struct Config {
+    opt: Opt,
+    config: BTreeMap<String, String>,
+}
+
+impl Config {
+    pub fn new(opt: Opt, config: BTreeMap<String, String>) -> Self {
+        Self {
+            opt,
+            config,
+        }
+    }
+
+    pub fn get(&self, key: &str) -> Option<String> {
+        self.opt.get(key).cloned().or_else(|| self.config.get(key).cloned())
+    }
 }
