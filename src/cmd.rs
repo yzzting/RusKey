@@ -3,11 +3,48 @@ use crate::db::DataType;
 use std::collections::BTreeMap;
 use std::str::SplitAsciiWhitespace;
 
+fn get_next_arg(parts: &mut SplitAsciiWhitespace) -> Result<String, &'static str> {
+    match parts.next() {
+        Some(arg) => Ok(arg.to_lowercase()),
+        None => Err("No command"),
+    }
+}
+
+fn handle_config(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
+    let arg = get_next_arg(parts)?;
+    match arg.as_str() {
+        "get" => {
+            let value = get_next_arg(parts)?;
+            let btree_map = match db.get("ruskey_config") {
+                Some(DataType::HashMap(btree_map)) => btree_map,
+                _ => return Err("No such key or wrong data type"),
+            };
+            let result = if value == "*" {
+                btree_map.iter()
+                    .map(|(filed, value)| format!("{}: {}", filed, value))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            } else {
+                match btree_map.get(&value) {
+                    Some(match_value) => format!("{}: {}", value, match_value),
+                    None => return Err("No such key or wrong data type"),
+                }
+            };
+
+            Ok(result.trim().to_string())
+        },
+        _ => Err("Config Invalid command!"),
+    }
+}
+
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
     let cmd = match parts.next() {
         Some(cmd) => cmd.to_lowercase(),
         None => return Err("No command"),
     };
+    if cmd == "config" {
+        return handle_config(parts, db);
+    }
     match cmd.as_str() {
         // Connection
         "ping" => {
@@ -17,7 +54,6 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                 None => Ok("PONG".to_string()),
             }
         },
-
         // String
         "get" => {
             let key = parts.next();
@@ -42,7 +78,6 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
             }
         },
         // Hash Map
-
         "hmset" => {
             let key = match parts.next() {
                 Some(key) => key,

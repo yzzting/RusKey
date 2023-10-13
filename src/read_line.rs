@@ -42,6 +42,16 @@ pub async fn read_line(state: &Store) -> Result<()> {
                         println!("Exiting RusKey");
                         process::exit(0);
                     }
+                    Some(&"config") => {
+                        match parts.get(1) {
+                            Some(&"get") | Some(&"set") => {
+                                send_command(&parts.join(" "), &state).await;
+                            }
+                            _ => {
+                                println!("Read Config Invalid command");
+                            }
+                        }
+                    }
                     Some(command) if commands.contains(command) => {
                         send_command(&parts.join(" "), &state).await;
                     }
