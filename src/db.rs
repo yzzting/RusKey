@@ -5,7 +5,8 @@ pub enum DataType {
     String(String),
     List(Vec<String>),
     Set(HashMap<String, String>),
-    HashMap(BTreeMap<String, String>),
+    HashMap(HashMap<String, String>),
+    BTreeMap(BTreeMap<String, String>),
 }
 
 pub struct Db {
@@ -27,5 +28,12 @@ impl Db {
 
     pub fn get(&self, key: &str) -> Option<&DataType> {
         self.map.get(key)
+    }
+
+    pub fn check_expired(&mut self, key: String) -> bool {
+        if self.map.contains_key(&key) {
+            return true;
+        }
+        false
     }
 }

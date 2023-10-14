@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 use std::str::SplitAsciiWhitespace;
 
 use crate::func::config::handle_config;
+use crate::func::expired::expired::handle_expired;
 
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
     let cmd = match parts.next() {
@@ -21,6 +22,12 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                 Some(arg) => Ok(arg.to_string()),
                 None => Ok("PONG".to_string()),
             }
+        },
+        // Expired
+        "expired" => {
+            let key = parts.next();
+            let value = parts.next();
+            return handle_expired(key, value, db);
         },
         // String
         "get" => {
@@ -59,7 +66,7 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                 };
                 btree_map.insert(field.to_string(), value.to_string());
             }
-            db.set(key.to_string(), DataType::HashMap(btree_map));
+            db.set(key.to_string(), DataType::BTreeMap(btree_map));
             Ok("OK".to_string())
         }
 
