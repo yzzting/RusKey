@@ -3,54 +3,7 @@ use crate::db::DataType;
 use std::collections::BTreeMap;
 use std::str::SplitAsciiWhitespace;
 
-fn get_next_arg(parts: &mut SplitAsciiWhitespace) -> Result<String, &'static str> {
-    match parts.next() {
-        Some(arg) => Ok(arg.to_lowercase()),
-        None => Err("No command"),
-    }
-}
-
-fn handle_config(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
-    let arg = get_next_arg(parts)?;
-    match arg.as_str() {
-        "get" => {
-            let value = get_next_arg(parts)?;
-            let btree_map = match db.get("ruskey_config") {
-                Some(DataType::HashMap(btree_map)) => btree_map,
-                _ => return Err("No such key or wrong data type"),
-            };
-            let result = if value == "*" {
-                btree_map.iter()
-                    .map(|(filed, value)| format!("{}: {}", filed, value))
-                    .collect::<Vec<String>>()
-                    .join(" ")
-            } else {
-                match btree_map.get(&value) {
-                    Some(match_value) => format!("{}: {}", value, match_value),
-                    None => return Err("No such key or wrong data type"),
-                }
-            };
-
-            Ok(result.trim().to_string())
-        },
-        "set" => {
-            let field = get_next_arg(parts)?;
-            let value = get_next_arg(parts)?;
-            let mut btree_map = match db.get("ruskey_config") {
-                Some(DataType::HashMap(btree_map)) => btree_map.clone(),
-                _ => return Err("No such key or wrong data type"),
-            };
-            let keys: Vec<&String> = btree_map.keys().collect();
-            if !keys.contains(&&field) {
-                return Err("No such key or wrong data type");
-            }
-            btree_map.insert(field.to_string(), value.to_string());
-            db.set("ruskey_config".to_string(), DataType::HashMap(btree_map));
-            Ok("OK".to_string())
-        },
-        _ => Err("Config Invalid command!"),
-    }
-}
+use crate::func::config::handle_config;
 
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
     let cmd = match parts.next() {
