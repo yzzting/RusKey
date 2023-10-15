@@ -36,14 +36,14 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                 // check expired
                 let expired = get_key_expired(Some(key), db);
                 if !expired.is_empty() && expired != "nil" {
-                    return Err("No such key or wrong data type");
+                    return Err("There is no such key, the key is expired, or the data type is incorrect");
                 }
                 if expired == "nil" {
                     return Err("nil");
                 }
                 match db.get(key) {
                     Some(DataType::String(value)) => Ok(value.clone()),
-                    _ => Err("No such key or wrong data type"),
+                    _ => Err("There is no such key, the key is expired, or the data type is incorrect"),
                 }
             } else {
                 Err("No such key")
@@ -86,7 +86,7 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
             // check expired
             let expired = get_key_expired(Some(key), db);
             if !expired.is_empty() && expired != "nil" {
-                return Err("No such key or wrong data type");
+                return Err("There is no such key, the key is expired, or the data type is incorrect");
             }
             if expired == "nil" {
                 return Err("nil");
@@ -99,7 +99,7 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                     }
                     Ok(result.trim().to_string())
                 }
-                _ => Err("No such key or wrong data type"),
+                _ => Err("There is no such key, the key is expired, or the data type is incorrect"),
             }
         }
         _ => Err("Invalid command!"),
