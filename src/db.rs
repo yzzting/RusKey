@@ -30,6 +30,14 @@ impl Db {
         self.map.get(key)
     }
 
+    pub fn delete(&mut self, key: &str) -> bool {
+        if self.map.contains_key(key) {
+            self.map.remove(key);
+            return true;
+        }
+        false
+    }
+
     pub fn check_expired(&mut self, key: String) -> bool {
         if self.map.contains_key(&key) {
             return true;

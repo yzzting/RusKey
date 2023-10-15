@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::db::Db;
 use crate::db::DataType;
@@ -49,4 +48,34 @@ pub fn handle_expired(key: Option<&str>, value: Option<&str>, db: &mut Db) -> Re
     db.set(EXPIRED.to_string(), DataType::HashMap(expired_map));
 
     Ok("OK".to_string())
+}
+
+pub fn get_key_expired(key: Option<&str>, db: &mut Db) -> String {
+    let key = match key {
+        Some(key) => key,
+        None => return "No such key".to_string(),
+    };
+
+    if !db.check_expired(key.to_string()) {
+        return "No such key".to_string();
+    }
+
+    let expired_map = match db.get(EXPIRED) {
+        Some(DataType::HashMap(expired_map)) => expired_map.clone(),
+        None => HashMap::new(),
+        _ => return "Invalid data type".to_string(),
+    };
+
+    let current_time = get_current_time();
+    let expired_time = match expired_map.get(key) {
+        Some(expired_time) => match expired_time.parse::<i32>() {
+            Ok(n) if n > current_time => "".to_string(),
+            _ => {
+                db.delete(key);
+                return "nil".to_string();
+            }
+        },
+        None => "".to_string(),
+    };
+    expired_time
 }

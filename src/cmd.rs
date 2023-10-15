@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use std::str::SplitAsciiWhitespace;
 
 use crate::func::config::handle_config;
-use crate::func::expired::expired::handle_expired;
+use crate::func::expired::expired::{handle_expired, get_key_expired};
 
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
     let cmd = match parts.next() {
@@ -33,6 +33,14 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
         "get" => {
             let key = parts.next();
             if let Some(key) = key {
+                // check expired
+                let expired = get_key_expired(Some(key), db);
+                if !expired.is_empty() && expired != "nil" {
+                    return Err("No such key or wrong data type");
+                }
+                if expired == "nil" {
+                    return Err("nil");
+                }
                 match db.get(key) {
                     Some(DataType::String(value)) => Ok(value.clone()),
                     _ => Err("No such key or wrong data type"),
@@ -75,6 +83,14 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                 Some(key) => key,
                 None => return Err("Key not specified"),
             };
+            // check expired
+            let expired = get_key_expired(Some(key), db);
+            if !expired.is_empty() && expired != "nil" {
+                return Err("No such key or wrong data type");
+            }
+            if expired == "nil" {
+                return Err("nil");
+            }
             match db.get(key) {
                 Some(DataType::HashMap(btree_map)) => {
                     let mut result = String::new();
