@@ -18,6 +18,15 @@ fn splice_time(expired: i32) -> String {
     expired_time.to_string()
 }
 
+fn get_expired_map(db: &mut Db) -> HashMap<String, String> {
+    let expired_map = match db.get(EXPIRED) {
+        Some(DataType::HashMap(expired_map)) => expired_map.clone(),
+        None => HashMap::new(),
+        _ => HashMap::new(),
+    };
+    expired_map
+}
+
 pub fn handle_expired(key: Option<&str>, value: Option<&str>, db: &mut Db) -> Result<String, &'static str> {
     let key = match key {
         Some(key) => key,
@@ -37,11 +46,7 @@ pub fn handle_expired(key: Option<&str>, value: Option<&str>, db: &mut Db) -> Re
         None => return Err("Invalid value"),
     };
 
-    let mut expired_map = match db.get(EXPIRED) {
-        Some(DataType::HashMap(expired_map)) => expired_map.clone(),
-        None => HashMap::new(),
-        _ => return Err("Invalid data type"),
-    };
+    let mut expired_map = get_expired_map(db);
 
     let expired_time = splice_time(value);
     expired_map.insert(key.to_string(), expired_time);
@@ -60,11 +65,7 @@ pub fn get_key_expired(key: Option<&str>, db: &mut Db) -> String {
         return "No such key".to_string();
     }
 
-    let expired_map = match db.get(EXPIRED) {
-        Some(DataType::HashMap(expired_map)) => expired_map.clone(),
-        None => HashMap::new(),
-        _ => return "Invalid data type".to_string(),
-    };
+    let expired_map = get_expired_map(db);
 
     let current_time = get_current_time();
     let expired_time = match expired_map.get(key) {
@@ -90,11 +91,7 @@ pub fn handle_ttl(key: Option<&str>, db: &mut Db) -> Result<String, &'static str
         return Err("-2");
     }
 
-    let expired_map = match db.get(EXPIRED) {
-        Some(DataType::HashMap(expired_map)) => expired_map.clone(),
-        None => HashMap::new(),
-        _ => return Err("Invalid data type"),
-    };
+    let expired_map = get_expired_map(db);
 
     let current_time = get_current_time();
     let expired_time = match expired_map.get(key) {
