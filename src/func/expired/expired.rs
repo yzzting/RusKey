@@ -5,14 +5,14 @@ use crate::db::DataType;
 
 const EXPIRED: &str = "expired";
 
-fn get_current_time() -> i32 {
+fn get_current_time() -> i64 {
     let now = chrono::Utc::now();
     let timestamp = now.timestamp();
-    timestamp as i32
+    timestamp
 }
 
 // splice current time and expired time
-fn splice_time(expired: i32) -> String {
+fn splice_time(expired: i64) -> String {
     let current_time = get_current_time();
     let expired_time = current_time + expired;
     expired_time.to_string()
@@ -39,7 +39,7 @@ pub fn handle_expired(key: Option<&str>, value: Option<&str>, db: &mut Db) -> Re
 
     // match value is number > 0
     let value = match value {
-        Some(v) => match v.parse::<i32>() {
+        Some(v) => match v.parse::<i64>() {
             Ok(n) if n > 0 => n,
             _ => return Err("Invalid value"),
         },
