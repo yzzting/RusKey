@@ -27,7 +27,7 @@ fn get_expired_map(db: &mut Db) -> HashMap<String, String> {
     expired_map
 }
 
-pub fn handle_expired(key: Option<&str>, value: Option<&str>, db: &mut Db) -> Result<String, &'static str> {
+pub fn handle_expired(key: Option<&str>, value: Option<&str>, type_str: &str, db: &mut Db) -> Result<String, &'static str> {
     let key = match key {
         Some(key) => key,
         None => return Err("No such key"),
@@ -37,10 +37,16 @@ pub fn handle_expired(key: Option<&str>, value: Option<&str>, db: &mut Db) -> Re
         return Err("No such key");
     }
 
-    // match value is number > 0
+    let flag_number = match type_str {
+        "" => 0,
+        "at" => get_current_time(),
+        "p" => 0,
+        _ => return Err("Invalid type"),
+    };
+
     let value = match value {
         Some(v) => match v.parse::<i64>() {
-            Ok(n) if n > 0 => n,
+            Ok(n) if n > flag_number => n,
             _ => return Err("Invalid value"),
         },
         None => return Err("Invalid value"),
@@ -48,7 +54,12 @@ pub fn handle_expired(key: Option<&str>, value: Option<&str>, db: &mut Db) -> Re
 
     let mut expired_map = get_expired_map(db);
 
-    let expired_time = splice_time(value);
+    let expired_time = if type_str == "" {
+        splice_time(value)
+    } else {
+        value.to_string()
+    };
+
     expired_map.insert(key.to_string(), expired_time);
     db.set(EXPIRED.to_string(), DataType::HashMap(expired_map));
 
@@ -69,7 +80,7 @@ pub fn get_key_expired(key: Option<&str>, db: &mut Db) -> String {
 
     let current_time = get_current_time();
     let expired_time = match expired_map.get(key) {
-        Some(expired_time) => match expired_time.parse::<i32>() {
+        Some(expired_time) => match expired_time.parse::<i64>() {
             Ok(n) if n > current_time => "".to_string(),
             _ => {
                 db.delete(key);
@@ -95,7 +106,7 @@ pub fn handle_ttl(key: Option<&str>, db: &mut Db) -> Result<String, &'static str
 
     let current_time = get_current_time();
     let expired_time = match expired_map.get(key) {
-        Some(expired_time) => match expired_time.parse::<i32>() {
+        Some(expired_time) => match expired_time.parse::<i64>() {
             Ok(n) if n > current_time => n,
             _ => {
                 db.delete(key);
