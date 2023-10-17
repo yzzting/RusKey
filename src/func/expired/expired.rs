@@ -92,14 +92,14 @@ pub fn get_key_expired(key: Option<&str>, db: &mut Db) -> String {
     expired_time
 }
 
-pub fn handle_ttl(key: Option<&str>, db: &mut Db) -> Result<String, &'static str> {
+pub fn handle_ttl(key: Option<&str>, db: &mut Db) -> i64 {
     let key = match key {
         Some(key) => key,
-        None => return Err("There is no such key, the key is expired, or the data type is incorrect"),
+        None => return -2,
     };
 
     if !db.check_expired(key.to_string()) {
-        return Err("-2");
+        return -2;
     }
 
     let expired_map = get_expired_map(db);
@@ -110,10 +110,10 @@ pub fn handle_ttl(key: Option<&str>, db: &mut Db) -> Result<String, &'static str
             Ok(n) if n > current_time => n,
             _ => {
                 db.delete(key);
-                return Err("-2");
+                return -2;
             }
         },
-        None => return Err("-2"),
+        None => return -2,
     };
-    Ok(((expired_time - current_time) / 1000).to_string())
+    (expired_time - current_time) / 1000
 }

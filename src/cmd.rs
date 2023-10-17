@@ -44,7 +44,8 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
         // TTL
         "ttl" => {
             let key = parts.next();
-            return handle_ttl(key, db)
+            let ttl = handle_ttl(key, db);
+            Ok(ttl.to_string())
         },
         // String
         "get" => {
