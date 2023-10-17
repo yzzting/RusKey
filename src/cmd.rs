@@ -30,10 +30,16 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
             return handle_expired(key, value, "", db);
         },
         // ExpiredAT
-        "expiredat" => {
+        "expireat" => {
             let key = parts.next();
             let value = parts.next();
             return handle_expired(key, value, "at", db);
+        },
+        // PEXPIREAT
+        "pexpireat" => {
+            let key = parts.next();
+            let value = parts.next();
+            return handle_expired(key, value, "p", db);
         },
         // TTL
         "ttl" => {

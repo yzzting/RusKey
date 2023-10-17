@@ -7,15 +7,15 @@ const EXPIRED: &str = "expired";
 
 fn get_current_time() -> i64 {
     let now = chrono::Utc::now();
-    let timestamp = now.timestamp();
+    let timestamp = now.timestamp_millis();
     timestamp
 }
 
 // splice current time and expired time
-fn splice_time(expired: i64) -> String {
+fn splice_time(expired: i64) -> i64 {
     let current_time = get_current_time();
     let expired_time = current_time + expired;
-    expired_time.to_string()
+    expired_time
 }
 
 fn get_expired_map(db: &mut Db) -> HashMap<String, String> {
@@ -37,16 +37,16 @@ pub fn handle_expired(key: Option<&str>, value: Option<&str>, type_str: &str, db
         return Err("No such key");
     }
 
-    let flag_number = match type_str {
-        "" => 0,
-        "at" => get_current_time(),
-        "p" => 0,
+    let (flag_number, multiplier) = match type_str {
+        "" => (0, 1),
+        "at" => (get_current_time() / 1000, 1000),
+        "p" => (get_current_time(), 1),
         _ => return Err("Invalid type"),
     };
 
     let value = match value {
         Some(v) => match v.parse::<i64>() {
-            Ok(n) if n > flag_number => n,
+            Ok(n) if n > flag_number => n * multiplier,
             _ => return Err("Invalid value"),
         },
         None => return Err("Invalid value"),
@@ -55,12 +55,12 @@ pub fn handle_expired(key: Option<&str>, value: Option<&str>, type_str: &str, db
     let mut expired_map = get_expired_map(db);
 
     let expired_time = if type_str == "" {
-        splice_time(value)
+        splice_time(value * 1000)
     } else {
-        value.to_string()
+        value
     };
 
-    expired_map.insert(key.to_string(), expired_time);
+    expired_map.insert(key.to_string(), expired_time.to_string());
     db.set(EXPIRED.to_string(), DataType::HashMap(expired_map));
 
     Ok("OK".to_string())
@@ -115,5 +115,5 @@ pub fn handle_ttl(key: Option<&str>, db: &mut Db) -> Result<String, &'static str
         },
         None => return Err("-2"),
     };
-    Ok((expired_time - current_time).to_string())
+    Ok(((expired_time - current_time) / 1000).to_string())
 }
