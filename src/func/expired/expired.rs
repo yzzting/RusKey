@@ -92,6 +92,24 @@ pub fn get_key_expired(key: Option<&str>, db: &mut Db) -> String {
     expired_time
 }
 
+pub fn del_key_expired(key: Option<&str>, db: &mut Db) -> String {
+    let key = match key {
+        Some(key) => key,
+        None => return "0".to_string(),
+    };
+
+    let mut expired_map = get_expired_map(db);
+
+    if !expired_map.contains_key(key) {
+        return "0".to_string();
+    }
+
+    expired_map.remove(key);
+    db.set(EXPIRED.to_string(), DataType::HashMap(expired_map));
+
+    "1".to_string()
+}
+
 pub fn handle_ttl(key: Option<&str>, type_str: &str, db: &mut Db) -> i64 {
     let key = match key {
         Some(key) => key,

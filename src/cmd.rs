@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use std::str::SplitAsciiWhitespace;
 
 use crate::func::config::handle_config;
-use crate::func::expired::expired::{handle_expired, get_key_expired, handle_ttl};
+use crate::func::expired::expired::{handle_expired, get_key_expired, handle_ttl, del_key_expired};
 
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
     let cmd = match parts.next() {
@@ -52,6 +52,12 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
             let key = parts.next();
             let ttl = handle_ttl(key, "p", db);
             Ok(ttl.to_string())
+        },
+        // Persist
+        "persist" => {
+            let key = parts.next();
+            let persist = del_key_expired(key, db);
+            Ok(persist.to_string())
         },
         // String
         "get" => {
