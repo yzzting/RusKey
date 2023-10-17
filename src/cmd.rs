@@ -59,6 +59,17 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
             let persist = del_key_expired(key, db);
             Ok(persist.to_string())
         },
+        // Exists
+        "exists" => {
+            if let Some(key) = parts.next() {
+                if db.check_expired(key.to_string()) {
+                    return Ok("1".to_string());
+                } else {
+                    return Ok("0".to_string());
+                }
+            }
+            Ok("0".to_string())
+        },
         // String
         "get" => {
             let key = parts.next();
