@@ -5,6 +5,7 @@ use std::str::SplitAsciiWhitespace;
 
 use crate::func::config::handle_config;
 use crate::func::expired::expired::{handle_expired, get_key_expired, handle_ttl, del_key_expired};
+use crate::func::rename::rename;
 
 pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
     let cmd = match parts.next() {
@@ -70,6 +71,12 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
             }
             Ok("0".to_string())
         },
+        // Rename
+        "rename" => {
+            let old_name = parts.next();
+            let new_name = parts.next();
+            return rename(old_name, new_name, db)
+        },
         // Del
         "del" => {
             let mut count = 0;
@@ -80,6 +87,7 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
             }
             Ok(count.to_string())
         },
+        // Rename
         // String
         "get" => {
             let key = parts.next();

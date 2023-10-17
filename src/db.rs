@@ -1,6 +1,6 @@
 use std::collections::{HashMap, BTreeMap};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum DataType {
     String(String),
     List(Vec<String>),
