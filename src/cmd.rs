@@ -70,6 +70,16 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
             }
             Ok("0".to_string())
         },
+        // Del
+        "del" => {
+            let mut count = 0;
+            while let Some(key) = parts.next() {
+                if db.delete(key) {
+                    count += 1;
+                }
+            }
+            Ok(count.to_string())
+        },
         // String
         "get" => {
             let key = parts.next();
