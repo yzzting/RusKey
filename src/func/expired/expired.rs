@@ -92,7 +92,7 @@ pub fn get_key_expired(key: Option<&str>, db: &mut Db) -> String {
     expired_time
 }
 
-pub fn handle_ttl(key: Option<&str>, db: &mut Db) -> i64 {
+pub fn handle_ttl(key: Option<&str>, type_str: &str, db: &mut Db) -> i64 {
     let key = match key {
         Some(key) => key,
         None => return -2,
@@ -115,5 +115,10 @@ pub fn handle_ttl(key: Option<&str>, db: &mut Db) -> i64 {
         },
         None => return -2,
     };
-    (expired_time - current_time) / 1000
+    let multiplier = match type_str {
+        "" => 1,
+        "p" => 1000,
+        _ => 1,
+    };
+    ((expired_time - current_time) / 1000) * multiplier
 }
