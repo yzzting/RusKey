@@ -75,7 +75,13 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
         "rename" => {
             let old_name = parts.next();
             let new_name = parts.next();
-            return rename(old_name, new_name, db)
+            return rename(old_name, new_name, "", db)
+        },
+        // RenameNX
+        "renamenx" => {
+            let old_name = parts.next();
+            let new_name = parts.next();
+            return rename(old_name, new_name, "nx", db)
         },
         // Del
         "del" => {
