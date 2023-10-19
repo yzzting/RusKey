@@ -6,7 +6,7 @@ pub enum DataType {
     List(Vec<String>),
     Set(HashMap<String, String>),
     HashMap(HashMap<String, String>),
-    BTreeMap(BTreeMap<String, String>),
+    ZSet(BTreeMap<String, String>),
 }
 
 pub struct Db {
@@ -38,8 +38,8 @@ impl Db {
         false
     }
 
-    pub fn check_expired(&mut self, key: String) -> bool {
-        if self.map.contains_key(&key) {
+    pub fn check_expired(&mut self, key: &str) -> bool {
+        if self.map.contains_key(key) {
             return true;
         }
         false

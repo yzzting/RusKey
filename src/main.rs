@@ -25,7 +25,7 @@ async fn main() {
     let db = Arc::new(Mutex::new(Db::new()));
     // init config
     let config_map = init::init();
-    db.lock().await.set("ruskey_config".to_string(), db::DataType::BTreeMap(config_map.clone()));
+    db.lock().await.set("ruskey_config".to_string(), db::DataType::ZSet(config_map.clone()));
     // parse args priority command line > config file
     let opt = Opt::parse();
     let config = Config::new(opt, config_map);

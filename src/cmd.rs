@@ -63,7 +63,7 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
         // Exists
         "exists" => {
             if let Some(key) = parts.next() {
-                if db.check_expired(key.to_string()) {
+                if db.check_expired(key) {
                     return Ok("1".to_string());
                 } else {
                     return Ok("0".to_string());
@@ -93,7 +93,24 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
             }
             Ok(count.to_string())
         },
-        // Rename
+        // Type
+        "type" => {
+            let key = match parts.next() {
+                Some(key) => key,
+                None => return Err("none"),
+            };
+            if !db.check_expired(key) {
+                return Ok("none".to_string());
+            }
+            match db.get(key) {
+                Some(DataType::String(_)) => Ok("string".to_string()),
+                Some(DataType::List(_)) => Ok("list".to_string()),
+                Some(DataType::Set(_)) => Ok("set".to_string()),
+                Some(DataType::HashMap(_)) => Ok("hash".to_string()),
+                Some(DataType::ZSet(_)) => Ok("zset".to_string()),
+                None => Ok("none".to_string()),
+            }
+        },
         // String
         "get" => {
             let key = parts.next();
@@ -139,7 +156,7 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                 };
                 btree_map.insert(field.to_string(), value.to_string());
             }
-            db.set(key.to_string(), DataType::BTreeMap(btree_map));
+            db.set(key.to_string(), DataType::ZSet(btree_map));
             Ok("OK".to_string())
         }
 

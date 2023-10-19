@@ -16,11 +16,11 @@ pub fn rename(old_name: Option<&str>, new_name: Option<&str>, type_str: &str, db
         None => return Err("No such key"),
     };
 
-    if !db.check_expired(old_name.to_string()) {
+    if !db.check_expired(old_name) {
         return Err("No such key");
     }
 
-    if db.check_expired(new_name.to_string()) && type_str == "nx" {
+    if db.check_expired(new_name) && type_str == "nx" {
         return Err("New name is exists");
     }
 

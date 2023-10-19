@@ -33,7 +33,7 @@ pub fn handle_expired(key: Option<&str>, value: Option<&str>, type_str: &str, db
         None => return Err("No such key"),
     };
 
-    if !db.check_expired(key.to_string()) {
+    if !db.check_expired(key) {
         return Err("No such key");
     }
 
@@ -72,7 +72,7 @@ pub fn get_key_expired(key: Option<&str>, db: &mut Db) -> String {
         None => return "No such key".to_string(),
     };
 
-    if !db.check_expired(key.to_string()) {
+    if !db.check_expired(key) {
         return "No such key".to_string();
     }
 
@@ -116,7 +116,7 @@ pub fn handle_ttl(key: Option<&str>, type_str: &str, db: &mut Db) -> i64 {
         None => return -2,
     };
 
-    if !db.check_expired(key.to_string()) {
+    if !db.check_expired(key) {
         return -2;
     }
 
