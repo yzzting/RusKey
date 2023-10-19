@@ -1,4 +1,5 @@
 use std::collections::{HashMap, BTreeMap};
+use rand::Rng;
 
 #[derive(Debug, Clone)]
 pub enum DataType {
@@ -43,5 +44,15 @@ impl Db {
             return true;
         }
         false
+    }
+
+    pub fn randomkey(&mut self) -> Option<String> {
+        let keys: Vec<_> = self.map.keys().cloned().collect();
+        if keys.is_empty() {
+            None
+        } else {
+            let idx = rand::thread_rng().gen_range(0..keys.len());
+            Some(keys[idx].clone())
+        }
     }
 }

@@ -111,6 +111,13 @@ pub fn handle_command(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<S
                 None => Ok("none".to_string()),
             }
         },
+        // RandomKey
+        "randomkey" => {
+            match db.randomkey() {
+                Some(key) => Ok(key),
+                None => Err("nil"),
+            }
+        },
         // String
         "get" => {
             let key = parts.next();
