@@ -1,14 +1,15 @@
-use crate::Store;
-use crate::func::stream::Client;
+use std::str::SplitAsciiWhitespace;
+use crate::db::Db;
+use crate::command_factory::Command;
 
-pub async fn ping(command: &str, state: &Store) {
-    let mut client = Client::new(&state.url).await.unwrap();
-    match client.send_command(command).await {
-        Ok(response) => {
-            println!("Received: {}", response);
-        }
-        Err(e) => {
-            println!("Error: {:?}", e);
+pub struct PingCommand {}
+
+impl Command for PingCommand {
+    fn execute(&self, parts: &mut SplitAsciiWhitespace, _db: &mut Db) -> Result<String, &'static str> {
+        let arg = parts.next();
+        match arg {
+            Some(arg) => Ok(arg.to_string()),
+            None => Ok("PONG".to_string()),
         }
     }
 }

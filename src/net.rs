@@ -6,6 +6,7 @@ use tokio::net::TcpStream;
 use std::str;
 use crate::db::Db;
 use crate::cmd;
+use crate::command_factory::CommandFactory;
 
 pub async fn handle_client(mut stream: TcpStream, db: &mut Db) -> Result<()> {
     let mut buffer = [0; 512]; // read up to 512 bytes
@@ -23,7 +24,8 @@ pub async fn handle_client(mut stream: TcpStream, db: &mut Db) -> Result<()> {
         let command = str::from_utf8(&buffer[..bytes_read]).unwrap().trim(); // convert bytes to string
 
         let mut parts = command.split_ascii_whitespace(); // split string into parts
-        match cmd::handle_command(&mut parts, db) {
+        let factory = CommandFactory::new();
+        match cmd::handle_command(&mut parts, db, &factory) {
             Ok(response) => stream.write(response.as_bytes()).await.map_err(|e| {
                 println!("Error: {:?}", e);
                 Error::new(ErrorKind::Other, "Failed to write to socket")

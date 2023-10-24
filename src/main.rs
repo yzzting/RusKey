@@ -1,6 +1,7 @@
 mod net;
 mod db;
 mod cmd;
+mod command_factory;
 mod args;
 mod read_line;
 mod func;
@@ -10,6 +11,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::net::TcpListener;
 use crate::db::Db;
+use crate::db::DataType;
 use crate::net::handle_client;
 use clap::Parser;
 use crate::args::Opt;
@@ -25,7 +27,8 @@ async fn main() {
     let db = Arc::new(Mutex::new(Db::new()));
     // init config
     let config_map = init::init();
-    db.lock().await.set("ruskey_config".to_string(), db::DataType::ZSet(config_map.clone()));
+    println!("config: {:?}", config_map);
+    db.lock().await.set("ruskey_config".to_string(), DataType::ZSet(config_map.clone()));
     // parse args priority command line > config file
     let opt = Opt::parse();
     let config = Config::new(opt, config_map);
