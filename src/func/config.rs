@@ -111,7 +111,6 @@ impl ConfigCommand {
 impl Command for ConfigCommand {
     fn execute(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         let arg = get_next_arg(parts)?;
-        println!("{}", arg);
         match arg.as_str() {
             "get" => self.get(parts, db),
             "set" => self.set(parts, db),
