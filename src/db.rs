@@ -4,8 +4,8 @@ use rand::Rng;
 #[derive(Debug, Clone)]
 pub enum DataType {
     String(String),
-    List(Vec<String>),
-    Set(HashMap<String, String>),
+    // List(Vec<String>),
+    // Set(HashMap<String, String>),
     HashMap(HashMap<String, String>),
     ZSet(BTreeMap<String, String>),
 }

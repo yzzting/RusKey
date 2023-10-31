@@ -59,15 +59,11 @@ fn get_next_arg(parts: &mut SplitAsciiWhitespace) -> Result<String, &'static str
 //     }
 // }
 
-pub struct ConfigCommand {
-    command: String,
-}
+pub struct ConfigCommand {}
 
 impl ConfigCommand {
-    pub fn new(command: String) -> ConfigCommand {
-        ConfigCommand {
-            command,
-        }
+    pub fn new() -> ConfigCommand {
+        ConfigCommand {}
     }
     
     fn get(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
