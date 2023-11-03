@@ -1,4 +1,5 @@
-use rus_key::db::{Db, DataType}; use rus_key::init;
+use rus_key::db::{Db, DataType};
+use rus_key::init;
 use rus_key::func::config::ConfigCommand;
 use rus_key::command_factory::Command;
 
