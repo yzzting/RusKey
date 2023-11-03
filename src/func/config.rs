@@ -91,7 +91,7 @@ impl ConfigCommand {
         let field = get_next_arg(parts)?;
         let value = get_next_arg(parts)?;
         let mut btree_map = match db.get("ruskey_config") {
-            Some(DataType::HashMap(btree_map)) => btree_map.clone(),
+            Some(DataType::ZSet(btree_map)) => btree_map.clone(),
             _ => return Err("No such key or wrong data type"),
         };
         let keys: Vec<&String> = btree_map.keys().collect();
@@ -103,7 +103,7 @@ impl ConfigCommand {
             return Err("Cannot modify");
         }
         btree_map.insert(field.to_string(), value.to_string());
-        db.set("ruskey_config".to_string(), DataType::HashMap(btree_map));
+        db.set("ruskey_config".to_string(), DataType::ZSet(btree_map));
         Ok("OK".to_string())
     }
 }
