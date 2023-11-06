@@ -26,11 +26,11 @@ impl CommandFactory {
         commands.insert("get".to_string(), Box::new(StringCommand::new("get".to_string())));
 
         // HashMap
-        commands.insert("hset".to_string(), Box::new(HashMapCommand::new("hset".to_string())));
+        commands.insert("hmset".to_string(), Box::new(HashMapCommand::new("hmset".to_string())));
         commands.insert("hgetall".to_string(), Box::new(HashMapCommand::new("hgetall".to_string())));
 
         // Config
-        commands.insert("config".to_string(), Box::new(ConfigCommand::new("config".to_string())));
+        commands.insert("config".to_string(), Box::new(ConfigCommand::new()));
         // Expired
         commands.insert("expired".to_string(), Box::new(ExpiredCommand::new("expired".to_string())));
         commands.insert("expireat".to_string(), Box::new(ExpiredCommand::new("expireat".to_string())));

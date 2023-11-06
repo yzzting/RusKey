@@ -59,15 +59,11 @@ fn get_next_arg(parts: &mut SplitAsciiWhitespace) -> Result<String, &'static str
 //     }
 // }
 
-pub struct ConfigCommand {
-    command: String,
-}
+pub struct ConfigCommand {}
 
 impl ConfigCommand {
-    pub fn new(command: String) -> ConfigCommand {
-        ConfigCommand {
-            command,
-        }
+    pub fn new() -> ConfigCommand {
+        ConfigCommand {}
     }
     
     fn get(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
@@ -95,7 +91,7 @@ impl ConfigCommand {
         let field = get_next_arg(parts)?;
         let value = get_next_arg(parts)?;
         let mut btree_map = match db.get("ruskey_config") {
-            Some(DataType::HashMap(btree_map)) => btree_map.clone(),
+            Some(DataType::ZSet(btree_map)) => btree_map.clone(),
             _ => return Err("No such key or wrong data type"),
         };
         let keys: Vec<&String> = btree_map.keys().collect();
@@ -107,7 +103,7 @@ impl ConfigCommand {
             return Err("Cannot modify");
         }
         btree_map.insert(field.to_string(), value.to_string());
-        db.set("ruskey_config".to_string(), DataType::HashMap(btree_map));
+        db.set("ruskey_config".to_string(), DataType::ZSet(btree_map));
         Ok("OK".to_string())
     }
 }
@@ -115,7 +111,6 @@ impl ConfigCommand {
 impl Command for ConfigCommand {
     fn execute(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         let arg = get_next_arg(parts)?;
-        println!("{}", arg);
         match arg.as_str() {
             "get" => self.get(parts, db),
             "set" => self.set(parts, db),

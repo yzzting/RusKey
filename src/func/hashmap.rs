@@ -17,7 +17,7 @@ impl HashMapCommand {
         }
     }
 
-    fn hset(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
+    fn hmset(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         let key = match parts.next() {
             Some(key) => key,
             None => return Err("Key not specified"),
@@ -48,7 +48,7 @@ impl HashMapCommand {
             return Err("nil");
         }
         match db.get(key) {
-            Some(DataType::HashMap(btree_map)) => {
+            Some(DataType::ZSet(btree_map)) => {
                 let mut result = String::new();
                 for (field, value) in btree_map {
                     result.push_str(&format!("{}: {} ", field, value));
@@ -63,7 +63,7 @@ impl HashMapCommand {
 impl Command for HashMapCommand {
     fn execute(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         match self.command.as_str() {
-            "hset" => self.hset(parts, db),
+            "hmset" => self.hmset(parts, db),
             "hgetall" => self.hgetall(parts, db),
             _ => Err("HashMapCommand Error: Command not found"),
         }

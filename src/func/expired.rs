@@ -144,7 +144,7 @@ impl ExpiredCommand {
                     return -2;
                 }
             },
-            None => return -2,
+            None => return -1,
         };
         let multiplier = match type_str {
             "" => 1,
