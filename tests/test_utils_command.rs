@@ -1,5 +1,6 @@
 use rus_key::db::Db;
 use rus_key::func::string::StringCommand;
+use rus_key::func::hashmap::HashMapCommand;
 use rus_key::func::utils::UtilsCommand;
 use rus_key::command_factory::Command;
 
@@ -17,6 +18,13 @@ fn set_key(db: &mut Db) {
     let mut parts_set = command_set_str.split_ascii_whitespace();
     let result_set = command_set.execute(&mut parts_set, db);
     assert_eq!(result_set.unwrap(), "OK".to_string());
+
+    // set hash
+    let command_hmset = HashMapCommand::new("hmset".to_string());
+    let command_hmset_str = "hash_key field1 value1 field2 value2";
+    let mut parts_hmset = command_hmset_str.split_ascii_whitespace();
+    let result_hmset = command_hmset.execute(&mut parts_hmset, db);
+    assert_eq!(result_hmset.unwrap(), "OK".to_string());
 }
 
 fn random_generate_key(db: &mut Db) -> Vec<String> {
@@ -160,4 +168,21 @@ fn test_del_command() {
 #[test]
 fn test_type_command() {
     let mut db = Db::new();
+    set_key(&mut db);
+
+    // string
+    let command_type = UtilsCommand::new("type".to_string());
+    let command_type_str = "key";
+    let mut parts_type = command_type_str.split_ascii_whitespace();
+    let result = command_type.execute(&mut parts_type, &mut db);
+    assert_eq!(result.unwrap(), "string".to_string());
+
+    // hash
+    let command_type = UtilsCommand::new("type".to_string());
+    let command_type_str = "hash_key";
+    let mut parts_type = command_type_str.split_ascii_whitespace();
+    let result = command_type.execute(&mut parts_type, &mut db);
+    assert_eq!(result.unwrap(), "zset".to_string());
+
+    // TODO list set hash type
 }
