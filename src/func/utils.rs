@@ -76,7 +76,7 @@ impl UtilsCommand {
             return Err("Failed to delete old key");
         }
     
-        Ok("OK".to_string())
+        Ok("1".to_string())
     }
 
     fn check_type(&self, key: Option<&str>, db: &mut Db) -> String {
