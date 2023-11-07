@@ -20,6 +20,18 @@ fn test_set_command() {
         },
         "value"
     );
+
+    let command_str = "key \"This is value\"";
+    let mut parts = command_str.split_ascii_whitespace();
+    let result = command.execute(&mut parts, &mut db);
+    assert_eq!(result.unwrap(), "OK".to_string());
+    assert_eq!(
+        match db.get("key") {
+            Some(DataType::String(value)) => value,
+            _ => panic!("Key not found"),
+        },
+        "This is value"
+    );
 }
 
 #[test]

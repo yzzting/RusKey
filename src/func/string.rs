@@ -17,7 +17,22 @@ impl StringCommand {
 
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         let key = parts.next();
-        let value = parts.next();
+        let mut value_parts = Vec::new();
+        while let Some(part) = parts.next() {
+            if part.starts_with('"') && !part.ends_with('"') {
+                value_parts.push(part[1..].to_string());
+                println!("value_parts: {:?}", value_parts);
+                while let Some(part) = parts.next() {
+                    value_parts.push(part.to_string());
+                    if part.ends_with('"') {
+                        break;
+                    }
+                }
+            } else {
+                value_parts.push(part.to_string());
+            }
+        }
+        let value = Some(value_parts.join(" ").trim_end_matches('"').to_string());
         if let (Some(key), Some(value)) = (key, value) {
             db.set(key.to_string(), DataType::String(value.to_string()));
             Ok("OK".to_string())
