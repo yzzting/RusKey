@@ -18,21 +18,19 @@ impl StringCommand {
 
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let key = parts.next();
-        let mut value_parts = Vec::new();
-        while let Some(part) = parts.next() {
-            if part.starts_with('"') && !part.ends_with('"') {
-                value_parts.push(part[1..].to_string());
+        let mut value = parts.next().map(|s| s.to_string());
+        if let Some(ref mut value_str) = value {
+            if value_str.starts_with('"') && !value_str.ends_with('"') {
                 while let Some(part) = parts.next() {
-                    value_parts.push(part.to_string());
+                    value_str.push_str(" ");
+                    value_str.push_str(part);
                     if part.ends_with('"') {
                         break;
                     }
                 }
-            } else {
-                value_parts.push(part.to_string());
             }
         }
-        let value = Some(value_parts.join(" ").trim_end_matches('"').to_string());
+        let value = value.map(|s| s.trim_matches('"').to_string());
         if let (Some(key), Some(value)) = (key, value) {
             db.set(key.to_string(), DataType::String(value.to_string()));
             "OK".to_string()
