@@ -4,6 +4,12 @@ use crate::db::Db;
 use crate::db::DataType;
 use crate::command_factory::Command;
 use crate::func::expired::get_key_expired;
+use crate::func::expired::ExpiredCommand;
+
+enum SetError {
+    InvalidExpiredTime,
+    KeyOfValueNotSpecified,
+}
 
 pub struct StringCommand {
     command: String,
@@ -17,7 +23,9 @@ impl StringCommand {
     }
 
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let expired_command = ExpiredCommand::new("expired".to_string());
         let key = parts.next();
+        // Parse value
         let mut value = parts.next().map(|s| s.to_string());
         if let Some(ref mut value_str) = value {
             if value_str.starts_with('"') && !value_str.ends_with('"') {
@@ -31,11 +39,54 @@ impl StringCommand {
             }
         }
         let value = value.map(|s| s.trim_matches('"').to_string());
+        let mut expired_time: Option<i64> = None;
+        let mut error_str: Option<SetError> = None;
+        // After parsing value, parse all remaining args
+        while let Some(arg) = parts.next() {
+            println!("arg: {}", arg);
+            match arg.to_lowercase().as_str() {
+                "ex" => {
+                    if let Some(seconds_str) = parts.next() {
+                        let seconds = seconds_str.parse::<i64>().unwrap();
+                        expired_time = Some(seconds);
+                    } else {
+                        error_str = Some(SetError::InvalidExpiredTime);
+                    }
+                },
+                "px" => {
+                    if let Some(milliseconds_str) = parts.next() {
+                        let milliseconds = milliseconds_str.parse::<i64>().unwrap();
+                        expired_time = Some((milliseconds + 999) / 1000);
+                    } else {
+                        error_str = Some(SetError::InvalidExpiredTime);
+                    }
+                },
+                _ => {},
+            }
+        }
+
         if let (Some(key), Some(value)) = (key, value) {
             db.set(key.to_string(), DataType::String(value.to_string()));
-            "OK".to_string()
+            // set expired time
+            if let Some(expired_time) = expired_time {
+                let expired_command_str = format!("{} {}", key, expired_time);
+                let mut expired_parts = expired_command_str.split_ascii_whitespace();
+                let expired_result = expired_command.execute(&mut expired_parts, db).unwrap();
+                if expired_result != "OK" {
+                    error_str = Some(SetError::InvalidExpiredTime);
+                }
+            }
         } else {
-            "Set Error: Key or value not specified".to_string()
+            error_str = Some(SetError::KeyOfValueNotSpecified);
+        }
+
+        if let Some(error_str) = error_str {
+            match error_str {
+                SetError::InvalidExpiredTime => return "Set Error: Invalid expired time".to_string(),
+                SetError::KeyOfValueNotSpecified => return "Set Error: Key or value not specified".to_string(),
+            }
+        } else {
+            return "OK".to_string();
         }
     }
 
