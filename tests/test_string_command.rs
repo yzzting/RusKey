@@ -44,12 +44,29 @@ fn test_set_command() {
     assert_eq!(result, "OK".to_string());
     assert(&mut db, "key", "This is value");
 
-    let result = general_command(&mut db, &command, "key_arg value EX 60");
+    // extra parameter
+    // test expired time EX seconds
+    let result = general_command(&mut db, &command, "key_ex_arg value EX 60");
     assert_eq!(result, "OK".to_string());
-    assert(&mut db, "key_arg", "value");
+    assert(&mut db, "key_ex_arg", "value");
+    let ttl_key_ex_result = ttl_command(&mut db, "ttl", "key_ex_arg");
+    assert!(0 < ttl_key_ex_result && ttl_key_ex_result <= 60);
 
-    let ttl_key_result = ttl_command(&mut db, "ttl", "key_arg");
-    assert!(0 < ttl_key_result && ttl_key_result <= 60);
+    // test expired time PX milliseconds
+    let result = general_command(&mut db, &command, "key_px_arg value PX 60000");
+    assert_eq!(result, "OK".to_string());
+    assert(&mut db, "key_px_arg", "value");
+    let ttl_key_px_result = ttl_command(&mut db, "ttl", "key_px_arg");
+    assert!(0 < ttl_key_px_result && ttl_key_px_result <= 60);
+
+    // error test
+    // test expired time EX seconds
+    let ex_result = general_command(&mut db, &command, "key_ex_arg value EX");
+    assert_eq!(ex_result, "Set Error: Invalid expired time".to_string());
+
+    // test expired time PX milliseconds
+    let px_result = general_command(&mut db, &command, "key_px_arg value PX");
+    assert_eq!(px_result, "Set Error: Invalid expired time".to_string());
 }
 
 #[test]
@@ -100,7 +117,7 @@ fn test_getrange_command() {
 
     let result = general_command(&mut db, &command_getrange, "key -20 -19");
     assert_eq!(result, "T".to_string());
-    
+
     let result = general_command(&mut db, &command_getrange, "non_existent_key 0 -2");
     assert_eq!(result, "".to_string());
 }
