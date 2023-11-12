@@ -41,11 +41,15 @@ impl StringCommand {
         let value = value.map(|s| s.trim_matches('"').to_string());
         let mut expired_time: Option<i64> = None;
         let mut error_str: Option<SetError> = None;
+        // String Vec to store extra args
+        let mut extra_args: Vec<String> = Vec::new();
         // After parsing value, parse all remaining args
         while let Some(arg) = parts.next() {
             println!("arg: {}", arg);
-            match arg.to_lowercase().as_str() {
+            let lower_arg = arg.to_lowercase();
+            match lower_arg.as_str() {
                 "ex" => {
+                    extra_args.push(lower_arg.to_string());
                     if let Some(seconds_str) = parts.next() {
                         let seconds = seconds_str.parse::<i64>().unwrap();
                         expired_time = Some(seconds);
@@ -54,6 +58,7 @@ impl StringCommand {
                     }
                 },
                 "px" => {
+                    extra_args.push(lower_arg.to_string());
                     if let Some(milliseconds_str) = parts.next() {
                         let milliseconds = milliseconds_str.parse::<i64>().unwrap();
                         expired_time = Some((milliseconds + 999) / 1000);
@@ -61,8 +66,23 @@ impl StringCommand {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
                 },
+                "exat" => {
+                    extra_args.push(lower_arg.to_string());
+                },
+                "pxat" => {
+                    extra_args.push(lower_arg.to_string());
+                },
                 _ => {},
             }
+        }
+
+        // ex/px and exat/pxat cannot exist simultaneously
+        if extra_args.contains(&"ex".to_string()) && extra_args.contains(&"exat".to_string()) {
+            return "Set Error: Invalid expired time in set".to_string();
+        }
+
+        if extra_args.contains(&"px".to_string()) && extra_args.contains(&"pxat".to_string()) {
+            return "Set Error: Invalid expired time in set".to_string();
         }
 
         if let (Some(key), Some(value)) = (key, value) {

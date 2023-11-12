@@ -67,6 +67,10 @@ fn test_set_command() {
     // test expired time PX milliseconds
     let px_result = general_command(&mut db, &command, "key_px_arg value PX");
     assert_eq!(px_result, "Set Error: Invalid expired time".to_string());
+
+    // test expired time ex and exat simultaneously
+    let ex_exat_result = general_command(&mut db, &command, "key_ex_exat_arg value EX 60 EXAT 1000");
+    assert_eq!(ex_exat_result, "Set Error: Invalid expired time in set".to_string());
 }
 
 #[test]
