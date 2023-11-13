@@ -11,6 +11,23 @@ enum SetError {
     KeyOfValueNotSpecified,
 }
 
+struct ExtraArgs {
+    ex: Option<i64>,
+    px: Option<i64>,
+    exat: Option<i64>,
+    pxat: Option<i64>,
+    nx: Option<bool>,
+    xx: Option<bool>,
+    keepttl: Option<bool>,
+    get: Option<bool>,
+}
+
+fn general_command(db: &mut Db, command_set: &ExpiredCommand, command_set_str: &str) -> String {
+    let mut parts_set = command_set_str.split_ascii_whitespace();
+    let result_set = command_set.execute(&mut parts_set, db);
+    return result_set.unwrap();
+}
+
 pub struct StringCommand {
     command: String,
 }
@@ -23,7 +40,23 @@ impl StringCommand {
     }
 
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        // ex px command
         let expired_command = ExpiredCommand::new("expired".to_string());
+        // exat command
+        let expired_at_command = ExpiredCommand::new("expireat".to_string());
+        // pxat command
+        let pexpired_at_command = ExpiredCommand::new("pexpireat".to_string());
+        // extra object
+        let mut extra_args = ExtraArgs {
+            ex: None,
+            px: None,
+            exat: None,
+            pxat: None,
+            nx: None,
+            xx: None,
+            keepttl: None,
+            get: None,
+        };
         let key = parts.next();
         // Parse value
         let mut value = parts.next().map(|s| s.to_string());
@@ -39,60 +72,74 @@ impl StringCommand {
             }
         }
         let value = value.map(|s| s.trim_matches('"').to_string());
-        let mut expired_time: Option<i64> = None;
         let mut error_str: Option<SetError> = None;
-        // String Vec to store extra args
-        let mut extra_args: Vec<String> = Vec::new();
+
         // After parsing value, parse all remaining args
         while let Some(arg) = parts.next() {
             println!("arg: {}", arg);
             let lower_arg = arg.to_lowercase();
             match lower_arg.as_str() {
                 "ex" => {
-                    extra_args.push(lower_arg.to_string());
                     if let Some(seconds_str) = parts.next() {
                         let seconds = seconds_str.parse::<i64>().unwrap();
-                        expired_time = Some(seconds);
+                        extra_args.ex = Some(seconds);
                     } else {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
                 },
                 "px" => {
-                    extra_args.push(lower_arg.to_string());
                     if let Some(milliseconds_str) = parts.next() {
                         let milliseconds = milliseconds_str.parse::<i64>().unwrap();
-                        expired_time = Some((milliseconds + 999) / 1000);
+                        extra_args.px = Some(milliseconds);
                     } else {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
                 },
-                "exat" => {
-                    extra_args.push(lower_arg.to_string());
-                },
-                "pxat" => {
-                    extra_args.push(lower_arg.to_string());
+                "exat" | "pxat" => {
+                    if let Some(timestamp) = parts.next() {
+                        let timestamp = timestamp.parse::<i64>().unwrap();
+                        if lower_arg == "exat" {
+                            extra_args.exat = Some(timestamp);
+                        } else {
+                            extra_args.pxat = Some(timestamp);
+                        }
+                    } else {
+                        error_str = Some(SetError::InvalidExpiredTime);
+                    }
                 },
                 _ => {},
             }
         }
 
         // ex/px and exat/pxat cannot exist simultaneously
-        if extra_args.contains(&"ex".to_string()) && extra_args.contains(&"exat".to_string()) {
-            return "Set Error: Invalid expired time in set".to_string();
-        }
-
-        if extra_args.contains(&"px".to_string()) && extra_args.contains(&"pxat".to_string()) {
-            return "Set Error: Invalid expired time in set".to_string();
+        if (extra_args.ex.is_some() && extra_args.exat.is_some()) || (extra_args.px.is_some() && extra_args.pxat.is_some()) {
+            return "Set Error: Invalid expired time".to_string();
         }
 
         if let (Some(key), Some(value)) = (key, value) {
             db.set(key.to_string(), DataType::String(value.to_string()));
-            // set expired time
-            if let Some(expired_time) = expired_time {
-                let expired_command_str = format!("{} {}", key, expired_time);
-                let mut expired_parts = expired_command_str.split_ascii_whitespace();
-                let expired_result = expired_command.execute(&mut expired_parts, db).unwrap();
-                if expired_result != "OK" {
+            // hangle extra arg
+            if extra_args.ex.is_some() {
+                let result = general_command(db, &expired_command, &format!("{} {}", key, extra_args.ex.unwrap_or(0)));
+                if result != "OK" {
+                    error_str = Some(SetError::InvalidExpiredTime);
+                }
+            }
+            if extra_args.px.is_some() {
+                let result = general_command(db, &expired_command, &format!("{} {}", key, extra_args.px.unwrap_or(0)));
+                if result != "OK" {
+                    error_str = Some(SetError::InvalidExpiredTime);
+                }
+            }
+            if extra_args.exat.is_some() {
+                let result = general_command(db, &expired_at_command, &format!("{} {}", key, extra_args.exat.unwrap_or(0)));
+                if result != "OK" {
+                    error_str = Some(SetError::InvalidExpiredTime);
+                }
+            }
+            if extra_args.pxat.is_some() {
+                let result = general_command(db, &pexpired_at_command, &format!("{} {}", key, extra_args.pxat.unwrap_or(0)));
+                if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
             }
