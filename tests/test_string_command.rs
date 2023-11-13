@@ -4,6 +4,12 @@ use rus_key::func::string::StringCommand;
 use rus_key::func::expired::ExpiredCommand;
 use rus_key::command_factory::Command;
 
+fn get_current_time() -> i64 {
+    let now = chrono::Utc::now();
+    let timestamp = now.timestamp_millis();
+    timestamp
+}
+
 fn ttl_command(db: &mut Db, command: &str, key: &str) -> i64 {
     let command_ttl = ExpiredCommand::new(command.to_string());
     let command_ttl_str = key;
@@ -71,6 +77,22 @@ fn test_set_command() {
     // test expired time ex and exat simultaneously
     let ex_exat_result = general_command(&mut db, &command, "key_ex_exat_arg value EX 60 EXAT 1000");
     assert_eq!(ex_exat_result, "Set Error: Invalid expired time in set".to_string());
+
+    // test expired time px and pxat simultaneously
+    let px_pxat_result = general_command(&mut db, &command, "key_px_pxat_arg value PX 60000 PXAT 1000");
+    assert_eq!(px_pxat_result, "Set Error: Invalid expired time in set".to_string());
+
+    // test expired time exat
+    let exat_arg_result = general_command(&mut db, &command, format!("key_exat_arg value EXAT {}", get_current_time() / 1000 + 60).as_str());
+    assert_eq!(exat_arg_result, "OK".to_string());
+    let ttl_key_exat_result = ttl_command(&mut db, "ttl", "key_exat_arg");
+    assert!(0 < ttl_key_exat_result && ttl_key_exat_result <= 60);
+
+    // test expired time pxat
+    let pxat_arg_result = general_command(&mut db, &command, format!("key_pxat_arg value PXAT {}", get_current_time() + 60000).as_str());
+    assert_eq!(pxat_arg_result, "OK".to_string());
+    let ttl_key_pxat_result = ttl_command(&mut db, "ttl", "key_pxat_arg");
+    assert!(0 < ttl_key_pxat_result && ttl_key_pxat_result <= 60);
 }
 
 #[test]
