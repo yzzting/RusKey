@@ -75,11 +75,14 @@ impl StringCommand {
         let mut error_str: Option<SetError> = None;
 
         // After parsing value, parse all remaining args
+        // ex px exat and pxat cannot exist simultaneously set a counter to count them
+        let mut expired_count = 0;
         while let Some(arg) = parts.next() {
             println!("arg: {}", arg);
             let lower_arg = arg.to_lowercase();
             match lower_arg.as_str() {
                 "ex" => {
+                    expired_count += 1;
                     if let Some(seconds_str) = parts.next() {
                         let seconds = seconds_str.parse::<i64>().unwrap();
                         extra_args.ex = Some(seconds);
@@ -88,6 +91,7 @@ impl StringCommand {
                     }
                 },
                 "px" => {
+                    expired_count += 1;
                     if let Some(milliseconds_str) = parts.next() {
                         let milliseconds = milliseconds_str.parse::<i64>().unwrap();
                         extra_args.px = Some((milliseconds + 999) / 1000);
@@ -96,6 +100,7 @@ impl StringCommand {
                     }
                 },
                 "exat" | "pxat" => {
+                    expired_count += 1;
                     if let Some(timestamp) = parts.next() {
                         let timestamp = timestamp.parse::<i64>().unwrap();
                         if lower_arg == "exat" {
@@ -112,7 +117,7 @@ impl StringCommand {
         }
 
         // ex/px and exat/pxat cannot exist simultaneously
-        if (extra_args.ex.is_some() && extra_args.exat.is_some()) || (extra_args.px.is_some() && extra_args.pxat.is_some()) {
+        if expired_count > 1 {
             return "Set Error: Invalid expired time in set".to_string();
         }
 
