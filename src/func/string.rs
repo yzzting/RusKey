@@ -90,7 +90,7 @@ impl StringCommand {
                 "px" => {
                     if let Some(milliseconds_str) = parts.next() {
                         let milliseconds = milliseconds_str.parse::<i64>().unwrap();
-                        extra_args.px = Some(milliseconds);
+                        extra_args.px = Some((milliseconds + 999) / 1000);
                     } else {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
@@ -113,7 +113,7 @@ impl StringCommand {
 
         // ex/px and exat/pxat cannot exist simultaneously
         if (extra_args.ex.is_some() && extra_args.exat.is_some()) || (extra_args.px.is_some() && extra_args.pxat.is_some()) {
-            return "Set Error: Invalid expired time".to_string();
+            return "Set Error: Invalid expired time in set".to_string();
         }
 
         if let (Some(key), Some(value)) = (key, value) {
