@@ -93,6 +93,27 @@ fn test_set_command() {
     assert_eq!(pxat_arg_result, "OK".to_string());
     let ttl_key_pxat_result = ttl_command(&mut db, "ttl", "key_pxat_arg");
     assert!(0 < ttl_key_pxat_result && ttl_key_pxat_result <= 60);
+
+    // test nx and xx simultaneously
+    let nx_xx_result = general_command(&mut db, &command, "key_nx_xx_arg value NX XX");
+    assert_eq!(nx_xx_result, "Set Error: nx and xx cannot exist simultaneously".to_string());
+
+    // test nx arg
+    let nx_result = general_command(&mut db, &command, "key_nx_arg value NX");
+    assert_eq!(nx_result, "OK".to_string());
+    assert(&mut db, "key_nx_arg", "value");
+
+    // test xx arg key not exist
+    let xx_result = general_command(&mut db, &command, "key_xx_not_arg value XX");
+    assert_eq!(xx_result, "Set Error: Key does not exist".to_string());
+
+    // test xx arg key exist
+    let result = general_command(&mut db, &command, "key_xx_arg value");
+    assert_eq!(result, "OK".to_string());
+    assert(&mut db, "key_xx_arg", "value");
+    let xx_result = general_command(&mut db, &command, "key_xx_arg value XX");
+    assert_eq!(xx_result, "OK".to_string());
+    assert(&mut db, "key_xx_arg", "value");
 }
 
 #[test]

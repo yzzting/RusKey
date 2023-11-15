@@ -77,6 +77,7 @@ impl StringCommand {
         // After parsing value, parse all remaining args
         // ex px exat and pxat cannot exist simultaneously set a counter to count them
         let mut expired_count = 0;
+        // if nx or xx is specified, the key must not exist or must exist
         while let Some(arg) = parts.next() {
             println!("arg: {}", arg);
             let lower_arg = arg.to_lowercase();
@@ -112,6 +113,12 @@ impl StringCommand {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
                 },
+                "nx" => {
+                    extra_args.nx = Some(true);
+                },
+                "xx" => {
+                    extra_args.xx = Some(true);
+                },
                 _ => {},
             }
         }
@@ -119,6 +126,21 @@ impl StringCommand {
         // ex/px and exat/pxat cannot exist simultaneously
         if expired_count > 1 {
             return "Set Error: Invalid expired time in set".to_string();
+        }
+
+        // nx and xx cannot exist simultaneously
+        if extra_args.nx.is_some() && extra_args.xx.is_some() {
+            return "Set Error: nx and xx cannot exist simultaneously".to_string();
+        }
+
+        // nx must not exist
+        if db.check_expired(key.unwrap()) && extra_args.nx.is_some() {
+            return "Set Error: Key already exists".to_string();
+        }
+
+        // xx must exist
+        if !db.check_expired(key.unwrap()) && extra_args.xx.is_some() {
+            return "Set Error: Key does not exist".to_string();
         }
 
         if let (Some(key), Some(value)) = (key, value) {
