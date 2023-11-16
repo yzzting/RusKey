@@ -46,6 +46,8 @@ impl StringCommand {
         let expired_at_command = ExpiredCommand::new("expireat".to_string());
         // pxat command
         let pexpired_at_command = ExpiredCommand::new("pexpireat".to_string());
+        // persist command
+        let persist_command = ExpiredCommand::new("persist".to_string());
         // extra object
         let mut extra_args = ExtraArgs {
             ex: None,
@@ -79,7 +81,6 @@ impl StringCommand {
         let mut expired_count = 0;
         // if nx or xx is specified, the key must not exist or must exist
         while let Some(arg) = parts.next() {
-            println!("arg: {}", arg);
             let lower_arg = arg.to_lowercase();
             match lower_arg.as_str() {
                 "ex" => {
@@ -118,6 +119,9 @@ impl StringCommand {
                 },
                 "xx" => {
                     extra_args.xx = Some(true);
+                },
+                "keepttl" => {
+                    extra_args.keepttl = Some(true);
                 },
                 _ => {},
             }
@@ -169,6 +173,14 @@ impl StringCommand {
                 if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
+            }
+            let key_expired = get_key_expired(Some(key), db);
+            println!("key_expired: {}", key_expired);
+            println!("expired_count: {}", expired_count);
+            println!("extra_args.keepttl: {:?}", extra_args.keepttl);
+            // if key not expired and not expired time arg, set expired time to nil
+            if !key_expired.is_empty() && expired_count == 0 && extra_args.keepttl.is_none() {
+                general_command(db, &persist_command, key);
             }
         } else {
             error_str = Some(SetError::KeyOfValueNotSpecified);

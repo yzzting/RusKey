@@ -1,3 +1,5 @@
+use std::thread;
+use std::time::Duration;
 use rus_key::db::Db;
 use rus_key::db::DataType;
 use rus_key::func::string::StringCommand;
@@ -114,6 +116,31 @@ fn test_set_command() {
     let xx_result = general_command(&mut db, &command, "key_xx_arg value XX");
     assert_eq!(xx_result, "OK".to_string());
     assert(&mut db, "key_xx_arg", "value");
+
+    // test keepttl arg
+    let ex_result = general_command(&mut db, &command, "key_ex_arg value EX 60");
+    assert_eq!(ex_result, "OK".to_string());
+    assert(&mut db, "key_ex_arg", "value");
+    let ttl_key_keepttl_result = ttl_command(&mut db, "ttl", "key_ex_arg");
+    assert!(0 < ttl_key_keepttl_result && ttl_key_keepttl_result <= 60);
+
+    let keepttl_result = general_command(&mut db, &command, "key_ex_arg value_keepttl KEEPTTL");
+    assert_eq!(keepttl_result, "OK".to_string());
+    assert(&mut db, "key_ex_arg", "value_keepttl");
+    thread::sleep(Duration::from_secs(10));
+    let ttl_key_keepttl_result = ttl_command(&mut db, "ttl", "key_ex_arg");
+    assert!(0 < ttl_key_keepttl_result && ttl_key_keepttl_result <= 50);
+
+    // test not keepttl arg
+    let ex_result = general_command(&mut db, &command, "key_ex_arg value EX 60");
+    assert_eq!(ex_result, "OK".to_string());
+    assert(&mut db, "key_ex_arg", "value");
+
+    let result = general_command(&mut db, &command, "key_ex_arg value_not_keepttl");
+    assert_eq!(result, "OK".to_string());
+    assert(&mut db, "key_ex_arg", "value_not_keepttl");
+    let ttl_key_not_keepttl_result = ttl_command(&mut db, "ttl", "key_ex_arg");
+    assert_eq!(ttl_key_not_keepttl_result, -1);
 }
 
 #[test]
