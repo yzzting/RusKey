@@ -40,11 +40,10 @@ pub fn get_key_expired(key: Option<&str>, db: &mut Db) -> String {
     }
 
     let expired_map = get_expired_map(db);
-
     let current_time = get_current_time();
     let expired_time = match expired_map.get(key) {
         Some(expired_time) => match expired_time.parse::<i64>() {
-            Ok(n) if n > current_time => "".to_string(),
+            Ok(n) if n > current_time => n.to_string(),
             _ => {
                 db.delete(key);
                 return "nil".to_string();
