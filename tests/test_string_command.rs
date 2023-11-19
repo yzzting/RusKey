@@ -83,6 +83,8 @@ fn test_set_command() -> Result<(), Box<dyn Error>> {
         ("key_ex_arg value EX 60", "key_ex_arg", "OK", "value", Some(true), Some(60)), // test keepttl arg
         ("key_ex_arg value_keepttl KEEPTTL", "key_ex_arg", "OK", "value_keepttl", Some(true), Some(60)), // test keepttl arg
         ("key_ex_arg value_not_keepttl", "key_ex_arg", "OK", "value_not_keepttl", Some(true), Some(-1)), // test not keepttl arg
+        ("key_get old_value", "key_get", "OK", "old_value", None, None), // test get arg set key_get
+        ("key_get new_value get", "key_get", "old_value", "new_value", None, None), // test get arg
     ];
 
     for (args, key, expected_result, expected_value, is_ttl, ttl) in tests_case {

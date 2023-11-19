@@ -59,6 +59,8 @@ impl StringCommand {
             keepttl: None,
             get: None,
         };
+        // return value OK or old value
+        let mut return_value = "OK".to_string();
         let key = parts.next();
         // Parse value
         let mut value = parts.next().map(|s| s.to_string());
@@ -123,6 +125,9 @@ impl StringCommand {
                 "keepttl" => {
                     extra_args.keepttl = Some(true);
                 },
+                "get" => {
+                    extra_args.get = Some(true);
+                },
                 _ => {},
             }
         }
@@ -148,6 +153,11 @@ impl StringCommand {
         }
 
         if let (Some(key), Some(value)) = (key, value) {
+            // if key exist and extra_args.get is true, return old value
+            let old_value = StringCommand::get(self, key, db);
+            if !old_value.is_empty() && extra_args.get.is_some() {
+                return_value = old_value;
+            }
             db.set(key.to_string(), DataType::String(value.to_string()));
             // hangle extra arg
             if extra_args.ex.is_some() {
@@ -189,7 +199,7 @@ impl StringCommand {
                 SetError::KeyOfValueNotSpecified => return "Set Error: Key or value not specified".to_string(),
             }
         } else {
-            return "OK".to_string();
+            return return_value.to_string();
         }
     }
 
