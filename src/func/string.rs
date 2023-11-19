@@ -175,9 +175,6 @@ impl StringCommand {
                 }
             }
             let key_expired = get_key_expired(Some(key), db);
-            println!("key_expired: {}", key_expired);
-            println!("expired_count: {}", expired_count);
-            println!("extra_args.keepttl: {:?}", extra_args.keepttl);
             // if key not expired and not expired time arg, set expired time to nil
             if !key_expired.is_empty() && expired_count == 0 && extra_args.keepttl.is_none() {
                 general_command(db, &persist_command, key);
