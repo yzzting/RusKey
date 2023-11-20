@@ -3,6 +3,7 @@ use rus_key::db::Db;
 use rus_key::db::DataType;
 use rus_key::func::string::StringCommand;
 use rus_key::func::expired::ExpiredCommand;
+use rus_key::func::utils::UtilsCommand;
 use rus_key::command_factory::Command;
 
 fn get_current_time() -> i64 {
@@ -59,9 +60,16 @@ fn assert_command(db: &mut Db, command_set: &StringCommand, args: &str, key: &st
 #[test]
 fn test_append_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
+    let exists_command = UtilsCommand::new("exists".to_string());
     let append_command = StringCommand::new("append".to_string());
     let getrange_command = StringCommand::new("getrange".to_string());
     let get_command = StringCommand::new("get".to_string());
+
+    // ensure that the key does not exist
+    let command_exists_str = "key";
+    let mut parts_exists = command_exists_str.split_ascii_whitespace();
+    let result_exists = exists_command.execute(&mut parts_exists, &mut db)?;
+    assert_eq!(result_exists, "0".to_string());
 
     let tests_case: Vec<(&str, &str, &str, &StringCommand)> = vec![
         ("key", "key", "There is no such key, the key is expired, or the data type is incorrect", &get_command),
