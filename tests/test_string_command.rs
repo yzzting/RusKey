@@ -72,7 +72,7 @@ fn test_append_command() -> Result<(), Box<dyn Error>> {
     assert_eq!(result_exists, "0".to_string());
 
     let tests_case: Vec<(&str, &str, &str, &StringCommand)> = vec![
-        ("key", "key", "There is no such key, the key is expired, or the data type is incorrect", &get_command),
+        ("key", "key", "nil", &get_command),
         ("key value_1", "key", "7", &append_command),
         ("key value_2", "key", "14", &append_command),
         ("key", "key", "value_1value_2", &get_command),

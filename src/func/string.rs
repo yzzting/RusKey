@@ -44,7 +44,7 @@ impl StringCommand {
         let value = parts.next();
         if let (Some(key), Some(value)) = (key, value) {
             let mut old_value = StringCommand::get(self, key, db);
-            if old_value == "There is no such key, the key is expired, or the data type is incorrect" {
+            if old_value == "nil" {
                 old_value = "".to_string();
             }
             old_value.push_str(value);
@@ -222,10 +222,12 @@ impl StringCommand {
 
     fn get(&self, key: &str, db: &mut Db) -> String {
         // check expired
-        let expired = get_key_expired(Some(key), db);
-        if !expired.is_empty() && expired != "nil" {
-            return "There is no such key, the key is expired, or the data type is incorrect".to_string();
+        if !db.check_expired(key) {
+            return "nil".to_string();
         }
+
+        let expired = get_key_expired(Some(key), db);
+
         if expired == "nil" {
             return "nil".to_string();
         }
@@ -253,7 +255,7 @@ impl StringCommand {
         };
 
         let key_value = self.get(key, db);
-        if key_value == "There is no such key, the key is expired, or the data type is incorrect" {
+        if key_value == "nil" {
             return "".to_string();
         }
         return StringCommand::slice_from_end(&key_value, start, end);
