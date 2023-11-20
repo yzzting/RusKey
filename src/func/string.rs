@@ -39,6 +39,23 @@ impl StringCommand {
         }
     }
 
+    fn append(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let key = parts.next();
+        let value = parts.next();
+        if let (Some(key), Some(value)) = (key, value) {
+            let mut old_value = StringCommand::get(self, key, db);
+            if old_value == "There is no such key, the key is expired, or the data type is incorrect" {
+                old_value = "".to_string();
+            }
+            old_value.push_str(value);
+            let len = old_value.len();
+            db.set(key.to_string(), DataType::String(old_value));
+            return format!("{}", len);
+        } else {
+            return "Append Error: Key or value not specified".to_string();
+        }
+    }
+
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         // ex px command
         let expired_command = ExpiredCommand::new("expired".to_string());
@@ -280,6 +297,7 @@ impl StringCommand {
 impl Command for StringCommand {
     fn execute(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         match self.command.as_str() {
+            "append" => Ok(self.append(parts, db)),
             "set" => Ok(self.set(parts, db)),
             "get" => Ok(self.get(parts.next().unwrap(), db)),
             "getrange" => Ok(self.get_range(parts, db)),

@@ -57,6 +57,34 @@ fn assert_command(db: &mut Db, command_set: &StringCommand, args: &str, key: &st
 }
 
 #[test]
+fn test_append_command() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+    let append_command = StringCommand::new("append".to_string());
+    let getrange_command = StringCommand::new("getrange".to_string());
+    let get_command = StringCommand::new("get".to_string());
+
+    let tests_case: Vec<(&str, &str, &str, &StringCommand)> = vec![
+        ("key", "key", "There is no such key, the key is expired, or the data type is incorrect", &get_command),
+        ("key value_1", "key", "7", &append_command),
+        ("key value_2", "key", "14", &append_command),
+        ("key", "key", "value_1value_2", &get_command),
+        ("key value_3", "key", "21", &append_command),
+        ("key", "key", "value_1value_2value_3", &get_command),
+        ("ts 0043", "ts", "4", &append_command),
+        ("ts 0035", "ts", "8", &append_command),
+        ("ts 0 3", "ts", "0043", &getrange_command),
+        ("ts 4 7", "ts", "0035", &getrange_command),
+    ];
+
+    for (args, key, expected_result, command) in tests_case {
+        println!("arg: {}, key: {}, expected_result: {}", args, key, expected_result);
+        assert_command(&mut db, command, args, key, expected_result, "", None, None)?;
+    }
+
+    Ok(())
+}
+
+#[test]
 fn test_set_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
     let command = StringCommand::new("set".to_string());
