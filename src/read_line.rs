@@ -6,7 +6,7 @@ use rustyline::{DefaultEditor, Result};
 use crate::Store;
 use crate::func::stream::Client;
 
-const COMMANDS: [&str; 19] = ["ping", "expired", "expireat", "pexpireat", "ttl", "pttl", "persist", "exists", "del", "rename", "renamenx", "type", "randomkey", "append", "get", "set", "getrange", "hmset", "hgetall"];
+const COMMANDS: [&str; 20] = ["ping", "expired", "expireat", "pexpireat", "ttl", "pttl", "persist", "exists", "del", "rename", "renamenx", "type", "randomkey", "append", "decr", "get", "set", "getrange", "hmset", "hgetall"];
 
 async fn send_command(command: &str, state: &Store) {
     let mut client = Client::new(&state.url).await.unwrap();

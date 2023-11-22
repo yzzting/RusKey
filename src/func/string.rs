@@ -28,6 +28,10 @@ fn general_command(db: &mut Db, command_set: &ExpiredCommand, command_set_str: &
     return result_set.unwrap();
 }
 
+fn is_integer(s: &str) -> bool {
+    s.parse::<i64>().is_ok()
+}
+
 pub struct StringCommand {
     command: String,
 }
@@ -54,6 +58,40 @@ impl StringCommand {
         } else {
             return "Append Error: Key or value not specified".to_string();
         }
+    }
+
+    fn decr(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let key = parts.next();
+        let old_value = StringCommand::get(self, key.unwrap(), db);
+
+        // old_value is nil
+        let new_value = if old_value == "nil" {
+            -1
+        } else {
+            // check if old_value is not an integer
+            if !is_integer(&old_value) {
+                return "Decr Error: Value is not an integer or out of range".to_string();
+            }
+            // old_value is an integer
+            match old_value.parse::<i128>() {
+                Ok(n) => {
+                    // old value is out of range
+                    if n <= i64::MIN as i128 || n > i64::MAX as i128 {
+                        return "Decr Error: Value is not an integer or out of range".to_string();
+                    }
+                    (n - 1) as i64
+                },
+                Err(_) => return "Decr Error: Value is not an integer or out of range".to_string(),
+            }
+        };
+        
+        // new_value is out of range or less than the minimum value of i64
+        if new_value < i64::MIN {
+            return "Decr Error: Value is not an integer or out of range".to_string();
+        }
+
+        db.set(key.unwrap().to_string(), DataType::String(new_value.to_string()));
+        new_value.to_string()
     }
 
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
@@ -300,6 +338,7 @@ impl Command for StringCommand {
     fn execute(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         match self.command.as_str() {
             "append" => Ok(self.append(parts, db)),
+            "decr" => Ok(self.decr(parts, db)),
             "set" => Ok(self.set(parts, db)),
             "get" => Ok(self.get(parts.next().unwrap(), db)),
             "getrange" => Ok(self.get_range(parts, db)),
