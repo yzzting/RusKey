@@ -129,6 +129,42 @@ fn test_decr_command() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_decrby_command() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+
+    let decrby_command = StringCommand::new("decrby".to_string());
+    let set_command = StringCommand::new("set".to_string());
+
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+        ("key_not_decrby", "key_not_decrby", "ERR wrong number of arguments for command", "", &decrby_command),
+        ("key_not_decrby 1", "key_not_decrby", "-1", "-1", &decrby_command),
+        ("key_int 10", "key_int", "OK", "10", &set_command),
+        ("key_int 1", "key_int", "9", "9", &decrby_command),
+        ("key_int 2", "key_int", "7", "7", &decrby_command),
+        ("key_int -1", "key_int", "8", "8", &decrby_command),
+        ("key_int 234293482390480948029348230948", "key_int", "OK", "234293482390480948029348230948", &set_command),
+        ("key_int 2", "key_int", "Decr Error: Value is not an integer or out of range", "234293482390480948029348230948", &decrby_command),
+        ("key_int -9223372036854775808", "key_int", "OK", "-9223372036854775808", &set_command),
+        ("key_int -1", "key_int", "-9223372036854775807", "-9223372036854775807", &decrby_command),
+        ("key_not_int 1.1", "key_not_int", "OK", "1.1", &set_command),
+        ("key_not_int 1", "key_not_int", "Decr Error: Value is not an integer or out of range", "1.1", &decrby_command),
+        ("key_not_int abc", "key_not_int", "OK", "abc", &set_command),
+        ("key_not_int 1", "key_not_int", "Decr Error: Value is not an integer or out of range", "abc", &decrby_command),
+        ("key_max 9223372036854775807", "key_max", "OK", "9223372036854775807", &set_command),
+        ("key_max 2", "key_max", "9223372036854775805", "9223372036854775805", &decrby_command),
+        ("key_min -9223372036854775807", "key_min", "OK", "-9223372036854775807", &set_command),
+        ("key_min 2", "key_min", "Decr Error: Value is not an integer or out of range", "-9223372036854775807", &decrby_command),
+    ];
+
+    for (args, key, expected_result, expected_value, command) in tests_case {
+        println!("arg: {}, key: {}, expected_result: {}, expected_value: {}", args, key, expected_result, expected_value);
+        assert_command(&mut db, command, args, key, expected_result, expected_value, None, None)?;
+    }
+
+    Ok(())
+}
+
+#[test]
 fn test_set_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
     let command = StringCommand::new("set".to_string());

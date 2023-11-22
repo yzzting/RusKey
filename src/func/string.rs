@@ -60,8 +60,23 @@ impl StringCommand {
         }
     }
 
-    fn decr(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn decr(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db, is_by: bool) -> String {
         let key = parts.next();
+        // is_by true get num value
+        let num: Option<i128> = if is_by {
+            match parts.next() {
+                Some(n) => n.parse::<i128>().ok(),
+                None => None,
+            }
+        } else {
+            Some(1)
+        };
+
+        let num_value = match num {
+            Some(n) => n,
+            None => return "ERR wrong number of arguments for command".to_string(),
+        };
+
         let old_value = StringCommand::get(self, key.unwrap(), db);
 
         // old_value is nil
@@ -75,20 +90,17 @@ impl StringCommand {
             // old_value is an integer
             match old_value.parse::<i128>() {
                 Ok(n) => {
-                    // old value is out of range
-                    if n <= i64::MIN as i128 || n > i64::MAX as i128 {
+                    println!("n: {}, num_value: {}", n, num_value);
+                    let new_value = n - num_value;
+                    // (n - num_value) as i64
+                    if new_value < i64::MIN as i128 || new_value > i64::MAX as i128 {
                         return "Decr Error: Value is not an integer or out of range".to_string();
                     }
-                    (n - 1) as i64
+                    new_value as i64
                 },
                 Err(_) => return "Decr Error: Value is not an integer or out of range".to_string(),
             }
         };
-        
-        // new_value is out of range or less than the minimum value of i64
-        if new_value < i64::MIN {
-            return "Decr Error: Value is not an integer or out of range".to_string();
-        }
 
         db.set(key.unwrap().to_string(), DataType::String(new_value.to_string()));
         new_value.to_string()
@@ -338,7 +350,8 @@ impl Command for StringCommand {
     fn execute(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         match self.command.as_str() {
             "append" => Ok(self.append(parts, db)),
-            "decr" => Ok(self.decr(parts, db)),
+            "decr" => Ok(self.decr(parts, db, false)),
+            "decrby" => Ok(self.decr(parts, db, true)),
             "set" => Ok(self.set(parts, db)),
             "get" => Ok(self.get(parts.next().unwrap(), db)),
             "getrange" => Ok(self.get_range(parts, db)),
