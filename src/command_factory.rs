@@ -25,6 +25,7 @@ impl CommandFactory {
         commands.insert("append".to_string(), Box::new(StringCommand::new("append".to_string())));
         commands.insert("decr".to_string(), Box::new(StringCommand::new("decr".to_string())));
         commands.insert("decrby".to_string(), Box::new(StringCommand::new("decrby".to_string())));
+        commands.insert("getdel".to_string(), Box::new(StringCommand::new("getdel".to_string())));
         commands.insert("set".to_string(), Box::new(StringCommand::new("set".to_string())));
         commands.insert("get".to_string(), Box::new(StringCommand::new("get".to_string())));
         commands.insert("getrange".to_string(), Box::new(StringCommand::new("getrange".to_string())));

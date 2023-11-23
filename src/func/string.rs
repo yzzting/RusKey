@@ -106,6 +106,20 @@ impl StringCommand {
         new_value.to_string()
     }
 
+    fn get_del(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let key = parts.next();
+        if let Some(key) = key {
+            let value = StringCommand::get(self, key, db);
+            if value == "nil" {
+                return "nil".to_string();
+            }
+            db.delete(key);
+            return value;
+        } else {
+            return "GetDel Error: Key not specified".to_string();
+        }
+    }
+
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         // ex px command
         let expired_command = ExpiredCommand::new("expired".to_string());
@@ -352,6 +366,7 @@ impl Command for StringCommand {
             "append" => Ok(self.append(parts, db)),
             "decr" => Ok(self.decr(parts, db, false)),
             "decrby" => Ok(self.decr(parts, db, true)),
+            "getdel" => Ok(self.get_del(parts, db)),
             "set" => Ok(self.set(parts, db)),
             "get" => Ok(self.get(parts.next().unwrap(), db)),
             "getrange" => Ok(self.get_range(parts, db)),

@@ -165,6 +165,30 @@ fn test_decrby_command() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_get_del_command() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+    let set_command = StringCommand::new("set".to_string());
+    let getdel_command = StringCommand::new("getdel".to_string());
+    let get_command = StringCommand::new("get".to_string());
+
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+        ("key value", "key", "OK", "value", &set_command),
+        ("key", "key", "value", "", &get_command),
+        ("key", "key", "value", "", &getdel_command),
+        ("key", "key", "nil", "", &get_command),
+        ("key_not_exist", "key_not_exist", "nil", "", &getdel_command),
+        ("key_not_exist", "key_not_exist", "nil", "", &get_command),
+    ];
+
+    for (args, key, expected_result, expected_value, command) in tests_case {
+        println!("arg: {}, key: {}, expected_result: {}, expected_value: {}", args, key, expected_result, expected_value);
+        assert_command(&mut db, command, args, key, expected_result, expected_value, None, None)?;
+    }
+
+    Ok(())
+}
+
+#[test]
 fn test_set_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
     let command = StringCommand::new("set".to_string());
