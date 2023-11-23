@@ -189,6 +189,43 @@ fn test_get_del_command() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_getex_command() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+    let set_command = StringCommand::new("set".to_string());
+    let getex_command = StringCommand::new("getex".to_string());
+    
+    let exat_string = format!("key value EXAT {}", get_current_time() / 1000 + 60);
+    let pxat_string = format!("key value PXAT {}", get_current_time() + 60000);
+
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand, Option<bool>, Option<i64>)> = vec![
+        ("key value", "key", "OK", "value", &set_command, None, None),
+        ("key", "key", "value", "", &getex_command, Some(true), Some(-1)),
+        ("key EX 60", "key", "value", "", &getex_command, Some(true), Some(60)),
+        ("key PX 60000", "key", "value", "", &getex_command, Some(true), Some(60)),
+        (&exat_string, "key", "value", "", &getex_command, Some(true), Some(60)),
+        (&pxat_string, "key", "value", "", &getex_command, Some(true), Some(60)),
+        ("key value EX 60000 EXAT 1700360582694", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
+        ("key value PX 60000 PXAT 1700360582694000", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
+        ("key value PX 60000 EX 60", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
+        ("key value PXAT 1700360582694000 EXAT 1700360582694", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
+        ("key value EX 60000 PERSIST", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
+        ("key value PX 60000 PERSIST", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
+        ("key value EXAT 1700360582694 PERSIST", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
+        ("key value PXAT 1700360582694000 PERSIST", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
+        ("key EX 60", "key", "value", "", &getex_command, Some(true), Some(60)),
+        ("key PERSIST", "key", "value", "", &getex_command, Some(true), Some(-1)),
+    ];
+
+    for (args, key, expected_result, expected_value, command, is_ttl, ttl) in tests_case {
+        println!("arg: {}, key: {}, expected_result: {}, expected_value: {}", args, key, expected_result, expected_value);
+        assert_command(&mut db, command, args, key, expected_result, expected_value, is_ttl, ttl)?;
+    }
+
+    Ok(())
+}
+
+
+#[test]
 fn test_set_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
     let command = StringCommand::new("set".to_string());
