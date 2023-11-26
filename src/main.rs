@@ -6,6 +6,7 @@ mod args;
 mod read_line;
 mod func;
 mod init;
+mod init_commands;
 
 use std::sync::Arc;
 use tokio::sync::Mutex;
