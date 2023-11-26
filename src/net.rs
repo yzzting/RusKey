@@ -1,16 +1,15 @@
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use std::io::Result;
 use std::io::{Error, ErrorKind};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 // use std::sync::{Arc, Mutex};
-use tokio::net::TcpStream;
-use std::str;
-use crate::db::Db;
 use crate::cmd;
 use crate::command_factory::CommandFactory;
+use crate::db::Db;
+use std::str;
+use tokio::net::TcpStream;
 
 pub async fn handle_client(mut stream: TcpStream, db: &mut Db) -> Result<()> {
     let mut buffer = [0; 512]; // read up to 512 bytes
-    // let mut stream = stream.lock().unwrap();
     loop {
         let bytes_read = stream.read(&mut buffer).await.map_err(|e| {
             println!("Error: {:?}", e);

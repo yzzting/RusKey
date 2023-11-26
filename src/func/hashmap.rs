@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use std::str::SplitAsciiWhitespace;
 
 use crate::command_factory::Command;
-use crate::db::Db;
 use crate::db::DataType;
+use crate::db::Db;
 use crate::func::expired::get_key_expired;
 
 pub struct HashMapCommand {
@@ -12,9 +12,7 @@ pub struct HashMapCommand {
 
 impl HashMapCommand {
     pub fn new(command: String) -> HashMapCommand {
-        HashMapCommand {
-            command,
-        }
+        HashMapCommand { command }
     }
 
     fn hmset(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
@@ -34,7 +32,11 @@ impl HashMapCommand {
         Ok("OK".to_string())
     }
 
-    fn hgetall(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
+    fn hgetall(
+        &self,
+        parts: &mut SplitAsciiWhitespace,
+        db: &mut Db,
+    ) -> Result<String, &'static str> {
         let key = match parts.next() {
             Some(key) => key,
             None => return Err("Key not specified"),
@@ -61,7 +63,11 @@ impl HashMapCommand {
 }
 
 impl Command for HashMapCommand {
-    fn execute(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
+    fn execute(
+        &self,
+        parts: &mut SplitAsciiWhitespace,
+        db: &mut Db,
+    ) -> Result<String, &'static str> {
         match self.command.as_str() {
             "hmset" => self.hmset(parts, db),
             "hgetall" => self.hgetall(parts, db),

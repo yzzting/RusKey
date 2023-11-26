@@ -1,10 +1,10 @@
-use std::process;
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
+use std::process;
 
-use crate::Store;
 use crate::func::stream::Client;
 use crate::init_commands::init_commands;
+use crate::Store;
 
 async fn send_command(command: &str, state: &Store) {
     let mut client = Client::new(&state.url).await.unwrap();
@@ -40,16 +40,14 @@ pub async fn read_line(state: &Store) -> Result<()> {
                         println!("Exiting RusKey");
                         process::exit(0);
                     }
-                    Some(&"config") => {
-                        match parts.get(1) {
-                            Some(&"get") | Some(&"set") => {
-                                send_command(&parts.join(" "), &state).await;
-                            }
-                            _ => {
-                                println!("Read Config Invalid command");
-                            }
+                    Some(&"config") => match parts.get(1) {
+                        Some(&"get") | Some(&"set") => {
+                            send_command(&parts.join(" "), &state).await;
                         }
-                    }
+                        _ => {
+                            println!("Read Config Invalid command");
+                        }
+                    },
                     Some(command) if commands.contains(&command.to_string()) => {
                         send_command(&parts.join(" "), &state).await;
                     }

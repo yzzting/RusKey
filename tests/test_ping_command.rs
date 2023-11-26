@@ -1,6 +1,6 @@
+use rus_key::command_factory::Command;
 use rus_key::db::Db;
 use rus_key::func::ping::PingCommand;
-use rus_key::command_factory::Command;
 
 #[test]
 fn test_ping_command() {

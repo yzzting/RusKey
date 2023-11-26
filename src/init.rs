@@ -1,5 +1,5 @@
-use std::fs;
 use std::collections::BTreeMap;
+use std::fs;
 
 use crate::args::Opt;
 
@@ -12,7 +12,7 @@ pub fn init() -> BTreeMap<String, String> {
             return BTreeMap::new();
         }
     };
-    
+
     let mut config = BTreeMap::new();
     for line in content.lines() {
         let line = line.trim();
@@ -41,13 +41,13 @@ pub struct Config {
 
 impl Config {
     pub fn new(opt: Opt, config: BTreeMap<String, String>) -> Self {
-        Self {
-            opt,
-            config,
-        }
+        Self { opt, config }
     }
 
     pub fn get(&self, key: &str) -> Option<String> {
-        self.opt.get(key).cloned().or_else(|| self.config.get(key).cloned())
+        self.opt
+            .get(key)
+            .cloned()
+            .or_else(|| self.config.get(key).cloned())
     }
 }

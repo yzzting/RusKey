@@ -1,22 +1,28 @@
-use rus_key::db::{Db, DataType};
-use rus_key::init;
-use rus_key::func::config::ConfigCommand;
 use rus_key::command_factory::Command;
+use rus_key::db::{DataType, Db};
+use rus_key::func::config::ConfigCommand;
+use rus_key::init;
 
 #[test]
 fn test_config_get_command() {
     let mut db = Db::new();
     let config_map = init::init();
-    db.set("ruskey_config".to_string(), DataType::ZSet(config_map.clone()));
+    db.set(
+        "ruskey_config".to_string(),
+        DataType::ZSet(config_map.clone()),
+    );
 
     let command = ConfigCommand {};
     let all_command_str = "get *";
     let mut all_parts = all_command_str.split_ascii_whitespace();
     let all_result = command.execute(&mut all_parts, &mut db);
-    assert_eq!(all_result.unwrap(), config_map.iter()
-        .map(|(filed, value)| format!("{}: {}", filed, value))
-        .collect::<Vec<String>>()
-        .join(" ")
+    assert_eq!(
+        all_result.unwrap(),
+        config_map
+            .iter()
+            .map(|(filed, value)| format!("{}: {}", filed, value))
+            .collect::<Vec<String>>()
+            .join(" ")
     );
 
     let single_command_str = "get host";
@@ -29,18 +35,18 @@ fn test_config_get_command() {
 // Currently, only the port and host configurations cannot be modified
 // #[test]
 // fn test_config_set_command() {
-    // let mut db = Db::new();
-    // let config_map = init::init();
-    // db.set("ruskey_config".to_string(), DataType::ZSet(config_map.clone()));
+// let mut db = Db::new();
+// let config_map = init::init();
+// db.set("ruskey_config".to_string(), DataType::ZSet(config_map.clone()));
 
-    // let command = ConfigCommand {};
-    // let command_str = "set port 16378";
-    // let mut parts = command_str.split_ascii_whitespace();
-    // let result = command.execute(&mut parts, &mut db);
-    // assert_eq!(result.unwrap(), "Cannot modify".to_string());
+// let command = ConfigCommand {};
+// let command_str = "set port 16378";
+// let mut parts = command_str.split_ascii_whitespace();
+// let result = command.execute(&mut parts, &mut db);
+// assert_eq!(result.unwrap(), "Cannot modify".to_string());
 
-    // let command_get = "get port";
-    // let mut parts_get = command_get.split_ascii_whitespace();
-    // let result_get = command.execute(&mut parts_get, &mut db);
-    // assert_eq!(result_get.unwrap(), "port: 16378".to_string());
+// let command_get = "get port";
+// let mut parts_get = command_get.split_ascii_whitespace();
+// let result_get = command.execute(&mut parts_get, &mut db);
+// assert_eq!(result_get.unwrap(), "port: 16378".to_string());
 // }

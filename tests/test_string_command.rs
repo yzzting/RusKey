@@ -1,10 +1,10 @@
-use std::error::Error;
-use rus_key::db::Db;
-use rus_key::db::DataType;
-use rus_key::func::string::StringCommand;
-use rus_key::func::expired::ExpiredCommand;
-use rus_key::func::utils::UtilsCommand;
 use rus_key::command_factory::Command;
+use rus_key::db::DataType;
+use rus_key::db::Db;
+use rus_key::func::expired::ExpiredCommand;
+use rus_key::func::string::StringCommand;
+use rus_key::func::utils::UtilsCommand;
+use std::error::Error;
 
 fn get_current_time() -> i64 {
     let now = chrono::Utc::now();
@@ -23,7 +23,11 @@ fn ttl_command(db: &mut Db, command: &str, key: &str) -> Result<i64, Box<dyn Err
     }
 }
 
-fn general_command(db: &mut Db, command_set: &StringCommand, command_set_str: &str) -> Result<String, Box<dyn Error>> {
+fn general_command(
+    db: &mut Db,
+    command_set: &StringCommand,
+    command_set_str: &str,
+) -> Result<String, Box<dyn Error>> {
     let mut parts_set = command_set_str.split_ascii_whitespace();
     let result_set = command_set.execute(&mut parts_set, db);
     match result_set {
@@ -32,7 +36,16 @@ fn general_command(db: &mut Db, command_set: &StringCommand, command_set_str: &s
     }
 }
 
-fn assert_command(db: &mut Db, command_set: &StringCommand, args: &str, key: &str, expected_result: &str, expected_value: &str, is_ttl: Option<bool>, ttl: Option<i64>) -> Result<(), Box<dyn Error>> {
+fn assert_command(
+    db: &mut Db,
+    command_set: &StringCommand,
+    args: &str,
+    key: &str,
+    expected_result: &str,
+    expected_value: &str,
+    is_ttl: Option<bool>,
+    ttl: Option<i64>,
+) -> Result<(), Box<dyn Error>> {
     let general_result = general_command(db, command_set, args)?;
     assert_eq!(general_result, expected_result);
     if !expected_value.is_empty() {
@@ -42,7 +55,7 @@ fn assert_command(db: &mut Db, command_set: &StringCommand, args: &str, key: &st
                 _ => panic!("Key not found"),
             },
             expected_value
-        ); 
+        );
     }
 
     if is_ttl.is_some() {
@@ -85,7 +98,10 @@ fn test_append_command() -> Result<(), Box<dyn Error>> {
     ];
 
     for (args, key, expected_result, command) in tests_case {
-        println!("arg: {}, key: {}, expected_result: {}", args, key, expected_result);
+        println!(
+            "arg: {}, key: {}, expected_result: {}",
+            args, key, expected_result
+        );
         assert_command(&mut db, command, args, key, expected_result, "", None, None)?;
     }
 
@@ -102,18 +118,78 @@ fn test_decr_command() -> Result<(), Box<dyn Error>> {
         ("key_not_decr", "key_not_decr", "-1", "-1", &decr_command),
         ("key_int 10", "key_int", "OK", "10", &set_command),
         ("key_int", "key_int", "9", "9", &decr_command),
-        ("key_int 234293482390480948029348230948", "key_int", "OK", "234293482390480948029348230948", &set_command),
-        ("key_int", "key_int", "Decr Error: Value is not an integer or out of range", "234293482390480948029348230948", &decr_command),
-        ("key_int -9223372036854775808", "key_int", "OK", "-9223372036854775808", &set_command),
-        ("key_int", "key_int", "Decr Error: Value is not an integer or out of range", "-9223372036854775808", &decr_command),
+        (
+            "key_int 234293482390480948029348230948",
+            "key_int",
+            "OK",
+            "234293482390480948029348230948",
+            &set_command,
+        ),
+        (
+            "key_int",
+            "key_int",
+            "Decr Error: Value is not an integer or out of range",
+            "234293482390480948029348230948",
+            &decr_command,
+        ),
+        (
+            "key_int -9223372036854775808",
+            "key_int",
+            "OK",
+            "-9223372036854775808",
+            &set_command,
+        ),
+        (
+            "key_int",
+            "key_int",
+            "Decr Error: Value is not an integer or out of range",
+            "-9223372036854775808",
+            &decr_command,
+        ),
         ("key_not_int 1.1", "key_not_int", "OK", "1.1", &set_command),
-        ("key_not_int", "key_not_int", "Decr Error: Value is not an integer or out of range", "1.1", &decr_command),
+        (
+            "key_not_int",
+            "key_not_int",
+            "Decr Error: Value is not an integer or out of range",
+            "1.1",
+            &decr_command,
+        ),
         ("key_not_int abc", "key_not_int", "OK", "abc", &set_command),
-        ("key_not_int", "key_not_int", "Decr Error: Value is not an integer or out of range", "abc", &decr_command),
-        ("key_max 9223372036854775807", "key_max", "OK", "9223372036854775807", &set_command),
-        ("key_max", "key_max", "9223372036854775806", "9223372036854775806", &decr_command),
-        ("key_min_plus_one -9223372036854775807", "key_min_plus_one", "OK", "-9223372036854775807", &set_command),
-        ("key_min_plus_one", "key_min_plus_one", "-9223372036854775808", "-9223372036854775808", &decr_command),
+        (
+            "key_not_int",
+            "key_not_int",
+            "Decr Error: Value is not an integer or out of range",
+            "abc",
+            &decr_command,
+        ),
+        (
+            "key_max 9223372036854775807",
+            "key_max",
+            "OK",
+            "9223372036854775807",
+            &set_command,
+        ),
+        (
+            "key_max",
+            "key_max",
+            "9223372036854775806",
+            "9223372036854775806",
+            &decr_command,
+        ),
+        (
+            "key_min_plus_one -9223372036854775807",
+            "key_min_plus_one",
+            "OK",
+            "-9223372036854775807",
+            &set_command,
+        ),
+        (
+            "key_min_plus_one",
+            "key_min_plus_one",
+            "-9223372036854775808",
+            "-9223372036854775808",
+            &decr_command,
+        ),
         ("key_repeat 5", "key_repeat", "OK", "5", &set_command),
         ("key_repeat", "key_repeat", "4", "4", &decr_command),
         ("key_repeat", "key_repeat", "3", "3", &decr_command),
@@ -121,8 +197,20 @@ fn test_decr_command() -> Result<(), Box<dyn Error>> {
     ];
 
     for (args, key, expected_result, expected_value, command) in tests_case {
-        println!("arg: {}, key: {}, expected_result: {}, expected_value: {}", args, key, expected_result, expected_value);
-        assert_command(&mut db, command, args, key, expected_result, expected_value, None, None)?;
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
     }
 
     Ok(())
@@ -136,29 +224,113 @@ fn test_decrby_command() -> Result<(), Box<dyn Error>> {
     let set_command = StringCommand::new("set".to_string());
 
     let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
-        ("key_not_decrby", "key_not_decrby", "ERR wrong number of arguments for command", "", &decrby_command),
-        ("key_not_decrby 1", "key_not_decrby", "-1", "-1", &decrby_command),
+        (
+            "key_not_decrby",
+            "key_not_decrby",
+            "ERR wrong number of arguments for command",
+            "",
+            &decrby_command,
+        ),
+        (
+            "key_not_decrby 1",
+            "key_not_decrby",
+            "-1",
+            "-1",
+            &decrby_command,
+        ),
         ("key_int 10", "key_int", "OK", "10", &set_command),
         ("key_int 1", "key_int", "9", "9", &decrby_command),
         ("key_int 2", "key_int", "7", "7", &decrby_command),
         ("key_int -1", "key_int", "8", "8", &decrby_command),
-        ("key_int 234293482390480948029348230948", "key_int", "OK", "234293482390480948029348230948", &set_command),
-        ("key_int 2", "key_int", "Decr Error: Value is not an integer or out of range", "234293482390480948029348230948", &decrby_command),
-        ("key_int -9223372036854775808", "key_int", "OK", "-9223372036854775808", &set_command),
-        ("key_int -1", "key_int", "-9223372036854775807", "-9223372036854775807", &decrby_command),
+        (
+            "key_int 234293482390480948029348230948",
+            "key_int",
+            "OK",
+            "234293482390480948029348230948",
+            &set_command,
+        ),
+        (
+            "key_int 2",
+            "key_int",
+            "Decr Error: Value is not an integer or out of range",
+            "234293482390480948029348230948",
+            &decrby_command,
+        ),
+        (
+            "key_int -9223372036854775808",
+            "key_int",
+            "OK",
+            "-9223372036854775808",
+            &set_command,
+        ),
+        (
+            "key_int -1",
+            "key_int",
+            "-9223372036854775807",
+            "-9223372036854775807",
+            &decrby_command,
+        ),
         ("key_not_int 1.1", "key_not_int", "OK", "1.1", &set_command),
-        ("key_not_int 1", "key_not_int", "Decr Error: Value is not an integer or out of range", "1.1", &decrby_command),
+        (
+            "key_not_int 1",
+            "key_not_int",
+            "Decr Error: Value is not an integer or out of range",
+            "1.1",
+            &decrby_command,
+        ),
         ("key_not_int abc", "key_not_int", "OK", "abc", &set_command),
-        ("key_not_int 1", "key_not_int", "Decr Error: Value is not an integer or out of range", "abc", &decrby_command),
-        ("key_max 9223372036854775807", "key_max", "OK", "9223372036854775807", &set_command),
-        ("key_max 2", "key_max", "9223372036854775805", "9223372036854775805", &decrby_command),
-        ("key_min -9223372036854775807", "key_min", "OK", "-9223372036854775807", &set_command),
-        ("key_min 2", "key_min", "Decr Error: Value is not an integer or out of range", "-9223372036854775807", &decrby_command),
+        (
+            "key_not_int 1",
+            "key_not_int",
+            "Decr Error: Value is not an integer or out of range",
+            "abc",
+            &decrby_command,
+        ),
+        (
+            "key_max 9223372036854775807",
+            "key_max",
+            "OK",
+            "9223372036854775807",
+            &set_command,
+        ),
+        (
+            "key_max 2",
+            "key_max",
+            "9223372036854775805",
+            "9223372036854775805",
+            &decrby_command,
+        ),
+        (
+            "key_min -9223372036854775807",
+            "key_min",
+            "OK",
+            "-9223372036854775807",
+            &set_command,
+        ),
+        (
+            "key_min 2",
+            "key_min",
+            "Decr Error: Value is not an integer or out of range",
+            "-9223372036854775807",
+            &decrby_command,
+        ),
     ];
 
     for (args, key, expected_result, expected_value, command) in tests_case {
-        println!("arg: {}, key: {}, expected_result: {}, expected_value: {}", args, key, expected_result, expected_value);
-        assert_command(&mut db, command, args, key, expected_result, expected_value, None, None)?;
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
     }
 
     Ok(())
@@ -181,8 +353,20 @@ fn test_get_del_command() -> Result<(), Box<dyn Error>> {
     ];
 
     for (args, key, expected_result, expected_value, command) in tests_case {
-        println!("arg: {}, key: {}, expected_result: {}, expected_value: {}", args, key, expected_result, expected_value);
-        assert_command(&mut db, command, args, key, expected_result, expected_value, None, None)?;
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
     }
 
     Ok(())
@@ -193,37 +377,176 @@ fn test_getex_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
     let set_command = StringCommand::new("set".to_string());
     let getex_command = StringCommand::new("getex".to_string());
-    
+
     let exat_string = format!("key value EXAT {}", get_current_time() / 1000 + 60);
     let pxat_string = format!("key value PXAT {}", get_current_time() + 60000);
 
-    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand, Option<bool>, Option<i64>)> = vec![
+    let tests_case: Vec<(
+        &str,
+        &str,
+        &str,
+        &str,
+        &StringCommand,
+        Option<bool>,
+        Option<i64>,
+    )> = vec![
         ("key value", "key", "OK", "value", &set_command, None, None),
-        ("key", "key", "value", "", &getex_command, Some(true), Some(-1)),
-        ("key EX 60", "key", "value", "", &getex_command, Some(true), Some(60)),
-        ("key PX 60000", "key", "value", "", &getex_command, Some(true), Some(60)),
-        (&exat_string, "key", "value", "", &getex_command, Some(true), Some(60)),
-        (&pxat_string, "key", "value", "", &getex_command, Some(true), Some(60)),
-        ("key value EX 60000 EXAT 1700360582694", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
-        ("key value PX 60000 PXAT 1700360582694000", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
-        ("key value PX 60000 EX 60", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
-        ("key value PXAT 1700360582694000 EXAT 1700360582694", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
-        ("key value EX 60000 PERSIST", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
-        ("key value PX 60000 PERSIST", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
-        ("key value EXAT 1700360582694 PERSIST", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
-        ("key value PXAT 1700360582694000 PERSIST", "key", "Set Error: Invalid expired time in set", "", &getex_command, None, None),
-        ("key EX 60", "key", "value", "", &getex_command, Some(true), Some(60)),
-        ("key PERSIST", "key", "value", "", &getex_command, Some(true), Some(-1)),
+        (
+            "key",
+            "key",
+            "value",
+            "",
+            &getex_command,
+            Some(true),
+            Some(-1),
+        ),
+        (
+            "key EX 60",
+            "key",
+            "value",
+            "",
+            &getex_command,
+            Some(true),
+            Some(60),
+        ),
+        (
+            "key PX 60000",
+            "key",
+            "value",
+            "",
+            &getex_command,
+            Some(true),
+            Some(60),
+        ),
+        (
+            &exat_string,
+            "key",
+            "value",
+            "",
+            &getex_command,
+            Some(true),
+            Some(60),
+        ),
+        (
+            &pxat_string,
+            "key",
+            "value",
+            "",
+            &getex_command,
+            Some(true),
+            Some(60),
+        ),
+        (
+            "key value EX 60000 EXAT 1700360582694",
+            "key",
+            "Set Error: Invalid expired time in set",
+            "",
+            &getex_command,
+            None,
+            None,
+        ),
+        (
+            "key value PX 60000 PXAT 1700360582694000",
+            "key",
+            "Set Error: Invalid expired time in set",
+            "",
+            &getex_command,
+            None,
+            None,
+        ),
+        (
+            "key value PX 60000 EX 60",
+            "key",
+            "Set Error: Invalid expired time in set",
+            "",
+            &getex_command,
+            None,
+            None,
+        ),
+        (
+            "key value PXAT 1700360582694000 EXAT 1700360582694",
+            "key",
+            "Set Error: Invalid expired time in set",
+            "",
+            &getex_command,
+            None,
+            None,
+        ),
+        (
+            "key value EX 60000 PERSIST",
+            "key",
+            "Set Error: Invalid expired time in set",
+            "",
+            &getex_command,
+            None,
+            None,
+        ),
+        (
+            "key value PX 60000 PERSIST",
+            "key",
+            "Set Error: Invalid expired time in set",
+            "",
+            &getex_command,
+            None,
+            None,
+        ),
+        (
+            "key value EXAT 1700360582694 PERSIST",
+            "key",
+            "Set Error: Invalid expired time in set",
+            "",
+            &getex_command,
+            None,
+            None,
+        ),
+        (
+            "key value PXAT 1700360582694000 PERSIST",
+            "key",
+            "Set Error: Invalid expired time in set",
+            "",
+            &getex_command,
+            None,
+            None,
+        ),
+        (
+            "key EX 60",
+            "key",
+            "value",
+            "",
+            &getex_command,
+            Some(true),
+            Some(60),
+        ),
+        (
+            "key PERSIST",
+            "key",
+            "value",
+            "",
+            &getex_command,
+            Some(true),
+            Some(-1),
+        ),
     ];
 
     for (args, key, expected_result, expected_value, command, is_ttl, ttl) in tests_case {
-        println!("arg: {}, key: {}, expected_result: {}, expected_value: {}", args, key, expected_result, expected_value);
-        assert_command(&mut db, command, args, key, expected_result, expected_value, is_ttl, ttl)?;
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            is_ttl,
+            ttl,
+        )?;
     }
 
     Ok(())
 }
-
 
 #[test]
 fn test_set_command() -> Result<(), Box<dyn Error>> {
@@ -236,29 +559,160 @@ fn test_set_command() -> Result<(), Box<dyn Error>> {
     let tests_case: Vec<(&str, &str, &str, &str, Option<bool>, Option<i64>)> = vec![
         ("key value", "key", "OK", "value", None, None), // test with a single parameter
         ("key value1 value2", "key", "OK", "value1", None, None), // test with multiple parameters
-        ("key \"This is value\"", "key", "OK", "This is value", None, None), // test with a value containing spaces
-        ("key_ex_arg value EX 60", "key_ex_arg", "OK", "value", Some(true), Some(60)), // extra parameter
-        ("key_px_arg value PX 60000", "key_px_arg", "OK", "value", Some(true), Some(60)), // test expired time PX milliseconds
-        (&exat_string, "key_exat_arg", "OK", "value", Some(true), Some(60)), // test expired time EXAT
-        (&pxat_string, "key_pxat_arg", "OK", "value", Some(true), Some(60)), // test expired time PXAT
-        ("key_ex_px_arg value EX 60 PX 60000", "key_ex_px_arg", "Set Error: Invalid expired time in set", "", None, None), // error test ex and px cannot exist simultaneously
-        ("key_ex_exat_arg value EX 60 EXAT 1700360582694", "key_ex_exat_arg", "Set Error: Invalid expired time in set", "", None, None), // error test ex and exat cannot exist simultaneously
-        ("key_px_pxat_arg value PX 60000 PXAT 1700360582694000", "key_px_pxat_arg", "Set Error: Invalid expired time in set", "", None, None), // error test px and pxat cannot exist simultaneously
-        ("key_nx_xx_arg value NX XX", "key_nx_xx_arg", "Set Error: nx and xx cannot exist simultaneously", "", None, None), // error test nx and xx cannot exist simultaneously
-        ("key_nx_arg value NX", "key_nx_arg", "OK", "value", None, None), // test nx arg
-        ("key_xx_not_arg value XX", "key_xx_not_arg", "Set Error: Key does not exist", "", None, None), // test xx arg key not exist
+        (
+            "key \"This is value\"",
+            "key",
+            "OK",
+            "This is value",
+            None,
+            None,
+        ), // test with a value containing spaces
+        (
+            "key_ex_arg value EX 60",
+            "key_ex_arg",
+            "OK",
+            "value",
+            Some(true),
+            Some(60),
+        ), // extra parameter
+        (
+            "key_px_arg value PX 60000",
+            "key_px_arg",
+            "OK",
+            "value",
+            Some(true),
+            Some(60),
+        ), // test expired time PX milliseconds
+        (
+            &exat_string,
+            "key_exat_arg",
+            "OK",
+            "value",
+            Some(true),
+            Some(60),
+        ), // test expired time EXAT
+        (
+            &pxat_string,
+            "key_pxat_arg",
+            "OK",
+            "value",
+            Some(true),
+            Some(60),
+        ), // test expired time PXAT
+        (
+            "key_ex_px_arg value EX 60 PX 60000",
+            "key_ex_px_arg",
+            "Set Error: Invalid expired time in set",
+            "",
+            None,
+            None,
+        ), // error test ex and px cannot exist simultaneously
+        (
+            "key_ex_exat_arg value EX 60 EXAT 1700360582694",
+            "key_ex_exat_arg",
+            "Set Error: Invalid expired time in set",
+            "",
+            None,
+            None,
+        ), // error test ex and exat cannot exist simultaneously
+        (
+            "key_px_pxat_arg value PX 60000 PXAT 1700360582694000",
+            "key_px_pxat_arg",
+            "Set Error: Invalid expired time in set",
+            "",
+            None,
+            None,
+        ), // error test px and pxat cannot exist simultaneously
+        (
+            "key_nx_xx_arg value NX XX",
+            "key_nx_xx_arg",
+            "Set Error: nx and xx cannot exist simultaneously",
+            "",
+            None,
+            None,
+        ), // error test nx and xx cannot exist simultaneously
+        (
+            "key_nx_arg value NX",
+            "key_nx_arg",
+            "OK",
+            "value",
+            None,
+            None,
+        ), // test nx arg
+        (
+            "key_xx_not_arg value XX",
+            "key_xx_not_arg",
+            "Set Error: Key does not exist",
+            "",
+            None,
+            None,
+        ), // test xx arg key not exist
         ("key_xx_arg value", "key_xx_arg", "OK", "value", None, None), // test xx arg key exist
-        ("key_xx_arg value_exist XX", "key_xx_arg", "OK", "value_exist", None, None), // test xx arg key exist
-        ("key_ex_arg value EX 60", "key_ex_arg", "OK", "value", Some(true), Some(60)), // test keepttl arg
-        ("key_ex_arg value_keepttl KEEPTTL", "key_ex_arg", "OK", "value_keepttl", Some(true), Some(60)), // test keepttl arg
-        ("key_ex_arg value_not_keepttl", "key_ex_arg", "OK", "value_not_keepttl", Some(true), Some(-1)), // test not keepttl arg
-        ("key_get old_value", "key_get", "OK", "old_value", None, None), // test get arg set key_get
-        ("key_get new_value get", "key_get", "old_value", "new_value", None, None), // test get arg
+        (
+            "key_xx_arg value_exist XX",
+            "key_xx_arg",
+            "OK",
+            "value_exist",
+            None,
+            None,
+        ), // test xx arg key exist
+        (
+            "key_ex_arg value EX 60",
+            "key_ex_arg",
+            "OK",
+            "value",
+            Some(true),
+            Some(60),
+        ), // test keepttl arg
+        (
+            "key_ex_arg value_keepttl KEEPTTL",
+            "key_ex_arg",
+            "OK",
+            "value_keepttl",
+            Some(true),
+            Some(60),
+        ), // test keepttl arg
+        (
+            "key_ex_arg value_not_keepttl",
+            "key_ex_arg",
+            "OK",
+            "value_not_keepttl",
+            Some(true),
+            Some(-1),
+        ), // test not keepttl arg
+        (
+            "key_get old_value",
+            "key_get",
+            "OK",
+            "old_value",
+            None,
+            None,
+        ), // test get arg set key_get
+        (
+            "key_get new_value get",
+            "key_get",
+            "old_value",
+            "new_value",
+            None,
+            None,
+        ), // test get arg
     ];
 
     for (args, key, expected_result, expected_value, is_ttl, ttl) in tests_case {
-        println!("arg: {}, key: {}, expected_result: {}, expected_value: {}, is_ttl: {:?}, ttl: {:?}", args, key, expected_result, expected_value, is_ttl, ttl);
-        assert_command(&mut db, &command, args, key, expected_result, expected_value, is_ttl, ttl)?;
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}, is_ttl: {:?}, ttl: {:?}",
+            args, key, expected_result, expected_value, is_ttl, ttl
+        );
+        assert_command(
+            &mut db,
+            &command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            is_ttl,
+            ttl,
+        )?;
     }
 
     Ok(())
@@ -307,8 +761,20 @@ fn test_getrange_command() -> Result<(), Box<dyn Error>> {
     ];
 
     for (args, key, expected_result, expected_value) in tests_case {
-        println!("arg: {}, key: {}, expected_result: {}, expected_value: {}", args, key, expected_result, expected_value);
-        assert_command(&mut db, &command_getrange, args, key, expected_result, expected_value, None, None)?;
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            &command_getrange,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
     }
 
     Ok(())

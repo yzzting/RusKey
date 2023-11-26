@@ -1,8 +1,11 @@
 use std::collections::HashSet;
 
-pub const STRING_COMMANDS: [&str; 8] = ["append", "decr", "decrby", "get", "getdel", "getex", "getrange", "set"];
+pub const STRING_COMMANDS: [&str; 8] = [
+    "append", "decr", "decrby", "get", "getdel", "getex", "getrange", "set",
+];
 pub const HASHMAP_COMMANDS: [&str; 2] = ["hmset", "hgetall"];
-pub const EXPIRED_COMMANDS: [&str; 6] = ["expired", "expireat", "pexpireat", "ttl", "pttl", "persist"];
+pub const EXPIRED_COMMANDS: [&str; 6] =
+    ["expired", "expireat", "pexpireat", "ttl", "pttl", "persist"];
 pub const UTILS_COMMANDS: [&str; 6] = ["rename", "renamenx", "randomkey", "del", "exists", "type"];
 
 pub fn init_commands() -> HashSet<String> {
@@ -17,4 +20,3 @@ pub fn init_commands() -> HashSet<String> {
 
     commands_map.iter().cloned().collect::<HashSet<_>>()
 }
-

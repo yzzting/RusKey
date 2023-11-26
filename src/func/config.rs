@@ -1,8 +1,8 @@
 use std::str::SplitAsciiWhitespace;
 
-use crate::db::Db;
-use crate::db::DataType;
 use crate::command_factory::Command;
+use crate::db::DataType;
+use crate::db::Db;
 
 const CANNOT_MODIFY: [&str; 2] = ["port", "host"];
 
@@ -65,7 +65,7 @@ impl ConfigCommand {
     pub fn new() -> ConfigCommand {
         ConfigCommand {}
     }
-    
+
     fn get(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         let value = get_next_arg(parts)?;
         let btree_map = match db.get("ruskey_config") {
@@ -73,7 +73,8 @@ impl ConfigCommand {
             _ => return Err("No ruskey_config key"),
         };
         let result = if value == "*" {
-            btree_map.iter()
+            btree_map
+                .iter()
                 .map(|(filed, value)| format!("{}: {}", filed, value))
                 .collect::<Vec<String>>()
                 .join(" ")
@@ -109,7 +110,11 @@ impl ConfigCommand {
 }
 
 impl Command for ConfigCommand {
-    fn execute(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
+    fn execute(
+        &self,
+        parts: &mut SplitAsciiWhitespace,
+        db: &mut Db,
+    ) -> Result<String, &'static str> {
         let arg = get_next_arg(parts)?;
         match arg.as_str() {
             "get" => self.get(parts, db),

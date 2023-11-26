@@ -1,5 +1,5 @@
-use std::collections::{HashMap, BTreeMap};
 use rand::Rng;
+use std::collections::{BTreeMap, HashMap};
 
 #[derive(Debug, Clone)]
 pub enum DataType {

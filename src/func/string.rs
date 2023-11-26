@@ -1,10 +1,10 @@
-use std::cmp::min;
-use std::str::SplitAsciiWhitespace;
-use crate::db::Db;
-use crate::db::DataType;
 use crate::command_factory::Command;
+use crate::db::DataType;
+use crate::db::Db;
 use crate::func::expired::get_key_expired;
 use crate::func::expired::ExpiredCommand;
+use std::cmp::min;
+use std::str::SplitAsciiWhitespace;
 
 enum SetError {
     InvalidExpiredTime,
@@ -46,9 +46,7 @@ pub struct StringCommand {
 
 impl StringCommand {
     pub fn new(command: String) -> StringCommand {
-        StringCommand {
-            command,
-        }
+        StringCommand { command }
     }
 
     fn append(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
@@ -105,12 +103,15 @@ impl StringCommand {
                         return "Decr Error: Value is not an integer or out of range".to_string();
                     }
                     new_value as i64
-                },
+                }
                 Err(_) => return "Decr Error: Value is not an integer or out of range".to_string(),
             }
         };
 
-        db.set(key.unwrap().to_string(), DataType::String(new_value.to_string()));
+        db.set(
+            key.unwrap().to_string(),
+            DataType::String(new_value.to_string()),
+        );
         new_value.to_string()
     }
 
@@ -148,7 +149,7 @@ impl StringCommand {
         };
         // ex px exat and pxat cannot exist simultaneously set a counter to count them
         let mut expired_count = 0;
-        
+
         let mut error_str: Option<SetError> = None;
         while let Some(arg) = parts.next() {
             let lower_arg = arg.to_lowercase();
@@ -161,7 +162,7 @@ impl StringCommand {
                     } else {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
-                },
+                }
                 "px" => {
                     expired_count += 1;
                     if let Some(milliseconds_str) = parts.next() {
@@ -170,7 +171,7 @@ impl StringCommand {
                     } else {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
-                },
+                }
                 "exat" | "pxat" => {
                     expired_count += 1;
                     if let Some(timestamp) = parts.next() {
@@ -183,12 +184,12 @@ impl StringCommand {
                     } else {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
-                },
+                }
                 "persist" => {
                     expired_count += 1;
                     extra_args.persist = Some(true);
-                },
-                _ => {},
+                }
+                _ => {}
             }
 
             // ex/px and exat/pxat cannot exist simultaneously
@@ -205,25 +206,41 @@ impl StringCommand {
 
             // handle extra arg
             if extra_args.ex.is_some() {
-                let result = general_command(db, &expired_command, &format!("{} {}", key, extra_args.ex.unwrap_or(0)));
+                let result = general_command(
+                    db,
+                    &expired_command,
+                    &format!("{} {}", key, extra_args.ex.unwrap_or(0)),
+                );
                 if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
             }
             if extra_args.px.is_some() {
-                let result = general_command(db, &expired_command, &format!("{} {}", key, extra_args.px.unwrap_or(0)));
+                let result = general_command(
+                    db,
+                    &expired_command,
+                    &format!("{} {}", key, extra_args.px.unwrap_or(0)),
+                );
                 if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
             }
             if extra_args.exat.is_some() {
-                let result = general_command(db, &expired_at_command, &format!("{} {}", key, extra_args.exat.unwrap_or(0)));
+                let result = general_command(
+                    db,
+                    &expired_at_command,
+                    &format!("{} {}", key, extra_args.exat.unwrap_or(0)),
+                );
                 if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
             }
             if extra_args.pxat.is_some() {
-                let result = general_command(db, &pexpired_at_command, &format!("{} {}", key, extra_args.pxat.unwrap_or(0)));
+                let result = general_command(
+                    db,
+                    &pexpired_at_command,
+                    &format!("{} {}", key, extra_args.pxat.unwrap_or(0)),
+                );
                 if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
@@ -237,13 +254,16 @@ impl StringCommand {
 
             if let Some(error_str) = error_str {
                 match error_str {
-                    SetError::InvalidExpiredTime => return "Set Error: Invalid expired time".to_string(),
-                    SetError::KeyOfValueNotSpecified => return "Set Error: Key or value not specified".to_string(),
+                    SetError::InvalidExpiredTime => {
+                        return "Set Error: Invalid expired time".to_string()
+                    }
+                    SetError::KeyOfValueNotSpecified => {
+                        return "Set Error: Key or value not specified".to_string()
+                    }
                 }
             } else {
                 return value;
             }
-
         } else {
             return "Key not specified".to_string();
         }
@@ -303,7 +323,7 @@ impl StringCommand {
                     } else {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
-                },
+                }
                 "px" => {
                     expired_count += 1;
                     if let Some(milliseconds_str) = parts.next() {
@@ -312,7 +332,7 @@ impl StringCommand {
                     } else {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
-                },
+                }
                 "exat" | "pxat" => {
                     expired_count += 1;
                     if let Some(timestamp) = parts.next() {
@@ -325,20 +345,20 @@ impl StringCommand {
                     } else {
                         error_str = Some(SetError::InvalidExpiredTime);
                     }
-                },
+                }
                 "nx" => {
                     extra_args.nx = Some(true);
-                },
+                }
                 "xx" => {
                     extra_args.xx = Some(true);
-                },
+                }
                 "keepttl" => {
                     extra_args.keepttl = Some(true);
-                },
+                }
                 "get" => {
                     extra_args.get = Some(true);
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
 
@@ -371,25 +391,41 @@ impl StringCommand {
             db.set(key.to_string(), DataType::String(value.to_string()));
             // hangle extra arg
             if extra_args.ex.is_some() {
-                let result = general_command(db, &expired_command, &format!("{} {}", key, extra_args.ex.unwrap_or(0)));
+                let result = general_command(
+                    db,
+                    &expired_command,
+                    &format!("{} {}", key, extra_args.ex.unwrap_or(0)),
+                );
                 if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
             }
             if extra_args.px.is_some() {
-                let result = general_command(db, &expired_command, &format!("{} {}", key, extra_args.px.unwrap_or(0)));
+                let result = general_command(
+                    db,
+                    &expired_command,
+                    &format!("{} {}", key, extra_args.px.unwrap_or(0)),
+                );
                 if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
             }
             if extra_args.exat.is_some() {
-                let result = general_command(db, &expired_at_command, &format!("{} {}", key, extra_args.exat.unwrap_or(0)));
+                let result = general_command(
+                    db,
+                    &expired_at_command,
+                    &format!("{} {}", key, extra_args.exat.unwrap_or(0)),
+                );
                 if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
             }
             if extra_args.pxat.is_some() {
-                let result = general_command(db, &pexpired_at_command, &format!("{} {}", key, extra_args.pxat.unwrap_or(0)));
+                let result = general_command(
+                    db,
+                    &pexpired_at_command,
+                    &format!("{} {}", key, extra_args.pxat.unwrap_or(0)),
+                );
                 if result != "OK" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
@@ -405,8 +441,12 @@ impl StringCommand {
 
         if let Some(error_str) = error_str {
             match error_str {
-                SetError::InvalidExpiredTime => return "Set Error: Invalid expired time".to_string(),
-                SetError::KeyOfValueNotSpecified => return "Set Error: Key or value not specified".to_string(),
+                SetError::InvalidExpiredTime => {
+                    return "Set Error: Invalid expired time".to_string()
+                }
+                SetError::KeyOfValueNotSpecified => {
+                    return "Set Error: Key or value not specified".to_string()
+                }
             }
         } else {
             return return_value.to_string();
@@ -426,7 +466,8 @@ impl StringCommand {
         }
         match db.get(key) {
             Some(DataType::String(value)) => value.clone(),
-            _ => "There is no such key, the key is expired, or the data type is incorrect".to_string(),
+            _ => "There is no such key, the key is expired, or the data type is incorrect"
+                .to_string(),
         }
     }
 
@@ -457,7 +498,7 @@ impl StringCommand {
     fn slice_from_end(str: &str, start: isize, end: isize) -> String {
         let char_vec: Vec<char> = str.chars().collect();
         let char_vec_len = char_vec.len() as isize;
-        let start  = if start < 0 {
+        let start = if start < 0 {
             let pos_start = char_vec_len + start;
             if pos_start < 0 {
                 0
@@ -475,7 +516,7 @@ impl StringCommand {
             } else {
                 pos_end as usize
             }
-        } else {            
+        } else {
             if end >= char_vec_len {
                 char_vec_len as usize
             } else {
@@ -490,7 +531,11 @@ impl StringCommand {
 }
 
 impl Command for StringCommand {
-    fn execute(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
+    fn execute(
+        &self,
+        parts: &mut SplitAsciiWhitespace,
+        db: &mut Db,
+    ) -> Result<String, &'static str> {
         match self.command.as_str() {
             "append" => Ok(self.append(parts, db)),
             "decr" => Ok(self.decr(parts, db, false)),

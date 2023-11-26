@@ -1,6 +1,6 @@
+use rus_key::command_factory::Command;
 use rus_key::db::Db;
 use rus_key::func::hashmap::HashMapCommand;
-use rus_key::command_factory::Command;
 
 #[test]
 fn test_hmset_command() {
