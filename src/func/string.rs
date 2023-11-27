@@ -513,6 +513,55 @@ impl StringCommand {
         return StringCommand::slice_from_end(&key_value, start, end);
     }
 
+    fn incr(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db, is_by: bool) -> String {
+        let key = parts.next();
+        // is_by true get num value
+        let num: Option<i128> = if is_by {
+            match parts.next() {
+                Some(n) => n.parse::<i128>().ok(),
+                None => None,
+            }
+        } else {
+            Some(1)
+        };
+
+        let num_value = match num {
+            Some(n) => n,
+            None => return "ERR wrong number of arguments for command".to_string(),
+        };
+
+        let old_value = StringCommand::get(self, key.unwrap(), db);
+
+        // old_value is nil
+        let new_value = if old_value == "nil" {
+            1
+        } else {
+            // check if old_value is not an integer
+            if !is_integer(&old_value) {
+                return "Incr Error: Value is not an integer or out of range".to_string();
+            }
+            // old_value is an integer
+            match old_value.parse::<i128>() {
+                Ok(n) => {
+                    println!("n: {}, num_value: {}", n, num_value);
+                    let new_value = n + num_value;
+                    // (n + num_value) as i64
+                    if new_value < i64::MIN as i128 || new_value > i64::MAX as i128 {
+                        return "Incr Error: Value is not an integer or out of range".to_string();
+                    }
+                    new_value as i64
+                }
+                Err(_) => return "Incr Error: Value is not an integer or out of range".to_string(),
+            }
+        };
+
+        db.set(
+            key.unwrap().to_string(),
+            DataType::String(new_value.to_string()),
+        );
+        new_value.to_string()
+    }
+
     fn slice_from_end(str: &str, start: isize, end: isize) -> String {
         let char_vec: Vec<char> = str.chars().collect();
         let char_vec_len = char_vec.len() as isize;
@@ -561,6 +610,7 @@ impl Command for StringCommand {
             "get" => Ok(self.get(parts.next().unwrap(), db)),
             "getdel" => Ok(self.get_del(parts, db)),
             "getex" => Ok(self.get_ex(parts, db)),
+            "incr" => Ok(self.incr(parts, db, false)),
             "getrange" => Ok(self.get_range(parts, db)),
             "getset" => Ok(self.get_set(parts, db)),
             "set" => Ok(self.set(parts, db)),
