@@ -11,6 +11,11 @@ enum SetError {
     KeyOfValueNotSpecified,
 }
 
+enum Accumulation {
+    Incr = 1,
+    Decr = -1,
+}
+
 struct ExtraArgs {
     ex: Option<i64>,
     px: Option<i64>,
@@ -513,7 +518,18 @@ impl StringCommand {
         return StringCommand::slice_from_end(&key_value, start, end);
     }
 
-    fn incr(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db, is_by: bool) -> String {
+    fn handle_accumulation(
+        &self,
+        parts: &mut SplitAsciiWhitespace,
+        db: &mut Db,
+        accumulation: Accumulation,
+        is_by: bool,
+    ) -> String {
+        // match accumulation incr or decr
+        let accumulation_str = match accumulation {
+            Accumulation::Incr => 1,
+            Accumulation::Decr => -1,
+        };
         let key = parts.next();
         // is_by true get num value
         let num: Option<i128> = if is_by {
@@ -534,7 +550,8 @@ impl StringCommand {
 
         // old_value is nil
         let new_value = if old_value == "nil" {
-            1
+            // accumulation_str == Incr is 1 or Decr is -1
+            accumulation_str
         } else {
             // check if old_value is not an integer
             if !is_integer(&old_value) {
@@ -544,12 +561,13 @@ impl StringCommand {
             match old_value.parse::<i128>() {
                 Ok(n) => {
                     println!("n: {}, num_value: {}", n, num_value);
-                    let new_value = n + num_value;
+                    // accumulation_str == Incr is n + num_value or Decr is n - num_value
+                    let new_value = n + accumulation_str * num_value;
                     // (n + num_value) as i64
                     if new_value < i64::MIN as i128 || new_value > i64::MAX as i128 {
                         return "Incr Error: Value is not an integer or out of range".to_string();
                     }
-                    new_value as i64
+                    new_value
                 }
                 Err(_) => return "Incr Error: Value is not an integer or out of range".to_string(),
             }
@@ -610,7 +628,7 @@ impl Command for StringCommand {
             "get" => Ok(self.get(parts.next().unwrap(), db)),
             "getdel" => Ok(self.get_del(parts, db)),
             "getex" => Ok(self.get_ex(parts, db)),
-            "incr" => Ok(self.incr(parts, db, false)),
+            "incr" => Ok(self.handle_accumulation(parts, db, Accumulation::Incr, false)),
             "getrange" => Ok(self.get_range(parts, db)),
             "getset" => Ok(self.get_set(parts, db)),
             "set" => Ok(self.set(parts, db)),
