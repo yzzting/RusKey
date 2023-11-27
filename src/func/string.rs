@@ -269,6 +269,24 @@ impl StringCommand {
         }
     }
 
+    fn get_set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let key = parts.next();
+        let value = parts.next();
+
+        if let (Some(key), Some(value)) = (key, value) {
+            let old_value = StringCommand::get(self, key, db);
+            db.set(key.to_string(), DataType::String(value.to_string()));
+            // if old_value is nil, return nil else return old_value
+            if old_value == "nil" {
+                return "nil".to_string();
+            } else {
+                return old_value;
+            }
+        } else {
+            return "GetSet Error: Key or value not specified".to_string();
+        }
+    }
+
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         // ex px command
         let expired_command = ExpiredCommand::new("expired".to_string());
@@ -540,11 +558,12 @@ impl Command for StringCommand {
             "append" => Ok(self.append(parts, db)),
             "decr" => Ok(self.decr(parts, db, false)),
             "decrby" => Ok(self.decr(parts, db, true)),
+            "get" => Ok(self.get(parts.next().unwrap(), db)),
             "getdel" => Ok(self.get_del(parts, db)),
             "getex" => Ok(self.get_ex(parts, db)),
-            "set" => Ok(self.set(parts, db)),
-            "get" => Ok(self.get(parts.next().unwrap(), db)),
             "getrange" => Ok(self.get_range(parts, db)),
+            "getset" => Ok(self.get_set(parts, db)),
+            "set" => Ok(self.set(parts, db)),
             _ => Err("StringCommand Error: Command not found"),
         }
     }

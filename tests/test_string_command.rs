@@ -549,6 +549,55 @@ fn test_getex_command() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_get_set_command() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+    let set_command = StringCommand::new("set".to_string());
+    let getset_command = StringCommand::new("getset".to_string());
+    let get_command = StringCommand::new("get".to_string());
+
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+        ("key value", "key", "OK", "value", &set_command),
+        ("key new_value", "key", "value", "new_value", &getset_command),
+        ("key", "key", "new_value", "", &get_command),
+        (
+            "key new_value_1",
+            "key",
+            "new_value",
+            "new_value_1",
+            &getset_command,
+        ),
+        ("key", "key", "new_value_1", "", &get_command),
+        (
+            "key_not_exist value",
+            "key_not_exist",
+            "nil",
+            "",
+            &getset_command,
+        ),
+        ("key_not_exist", "key_not_exist", "value", "", &get_command),
+    ];
+
+    for (args, key, expected_result, expected_value, command) in tests_case {
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
+    }
+
+    Ok(())
+}
+
+#[test]
 fn test_set_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
     let command = StringCommand::new("set".to_string());
