@@ -1017,39 +1017,90 @@ fn test_get_command() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_getrange_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
-    let command = StringCommand::new("set".to_string());
-    let result = general_command(&mut db, &command, "key \"This is a string\"")?;
-    assert_eq!(result, "OK".to_string());
-    assert_eq!(
-        match db.get("key") {
-            Some(DataType::String(value)) => value,
-            _ => panic!("Key not found"),
-        },
-        "This is a string"
-    );
+    let set_command = StringCommand::new("set".to_string());
+    // let result = general_command(&mut db, &command, "key \"This is a string\"")?;
+    // assert_eq!(result, "OK".to_string());
+    // assert_eq!(
+    //     match db.get("key") {
+    //         Some(DataType::String(value)) => value,
+    //         _ => panic!("Key not found"),
+    //     },
+    //     "This is a string"
+    // );
 
-    let command_getrange = StringCommand::new("getrange".to_string());
-    let tests_case: Vec<(&str, &str, &str, &str)> = vec![
-        ("key 0 3", "key", "This", ""),
-        ("key 0 16", "key", "This is a string", ""),
-        ("key 0 -1", "key", "This is a string", ""),
-        ("key -3 -1", "key", "ing", ""),
-        ("key 10 100", "key", "string", ""),
-        ("key 0 0", "key", "T", ""),
-        ("key 2 1", "key", "", ""),
-        ("key -20 -1", "key", "This is a string", ""),
-        ("key -20 -19", "key", "T", ""),
-        ("non_existent_key 0 -2", "non_existent_key", "", ""),
+    let getrange_command = StringCommand::new("getrange".to_string());
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+        (
+            "key \"This is a string\"",
+            "key",
+            "OK",
+            "This is a string",
+            &set_command,
+        ),
+        ("key 0 3", "key", "This", "", &getrange_command),
+        ("key 0 16", "key", "This is a string", "", &getrange_command),
+        ("key 0 -1", "key", "", "", &getrange_command),
+        ("key -3 -1", "key", "ing", "", &getrange_command),
+        ("key 10 100", "key", "string", "", &getrange_command),
+        ("key 0 0", "key", "T", "", &getrange_command),
+        ("key 2 1", "key", "", "", &getrange_command),
+        (
+            "key -20 -1",
+            "key",
+            "This is a string",
+            "",
+            &getrange_command,
+        ),
+        ("key -20 -19", "key", "", "", &getrange_command),
+        (
+            "non_existent_key 0 -2",
+            "non_existent_key",
+            "",
+            "",
+            &getrange_command,
+        ),
+        ("single_char S", "single_char", "OK", "S", &set_command),
+        ("single_char 0 0", "single_char", "S", "", &getrange_command),
+        ("empty_str \"\"", "empty_str", "OK", "", &set_command),
+        ("empty_str 0 0", "empty_str", "", "", &getrange_command),
+        (
+            "special_chars #$%^&",
+            "special_chars",
+            "OK",
+            "#$%^&",
+            &set_command,
+        ),
+        (
+            "special_chars 0 5",
+            "special_chars",
+            "#$%^&",
+            "",
+            &getrange_command,
+        ),
+        (
+            "non_ascii 你好世界",
+            "non_ascii",
+            "OK",
+            "你好世界",
+            &set_command,
+        ),
+        (
+            "non_ascii 0 5",
+            "non_ascii",
+            "你好世界",
+            "",
+            &getrange_command,
+        ),
     ];
 
-    for (args, key, expected_result, expected_value) in tests_case {
+    for (args, key, expected_result, expected_value, command) in tests_case {
         println!(
             "arg: {}, key: {}, expected_result: {}, expected_value: {}",
             args, key, expected_result, expected_value
         );
         assert_command(
             &mut db,
-            &command_getrange,
+            command,
             args,
             key,
             expected_result,

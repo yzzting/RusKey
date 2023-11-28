@@ -445,30 +445,6 @@ impl StringCommand {
         }
     }
 
-    fn get_range(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
-        let key = parts.next().unwrap();
-        let start = match parts.next() {
-            Some(start_str) => match start_str.parse::<isize>() {
-                Ok(start) => start,
-                Err(_) => return "GetRange Error: Invalid start value".to_string(),
-            },
-            None => return "GetRange Error: Start not specified".to_string(),
-        };
-        let end = match parts.next() {
-            Some(end_str) => match end_str.parse::<isize>() {
-                Ok(end) => end,
-                Err(_) => return "GetRange Error: Invalid end value".to_string(),
-            },
-            None => return "GetRange Error: End not specified".to_string(),
-        };
-
-        let key_value = self.get(key, db);
-        if key_value == "nil" {
-            return "".to_string();
-        }
-        return StringCommand::slice_from_end(&key_value, start, end);
-    }
-
     fn handle_accumulation(
         &self,
         parts: &mut SplitAsciiWhitespace,
@@ -531,37 +507,44 @@ impl StringCommand {
         new_value.to_string()
     }
 
-    fn slice_from_end(str: &str, start: isize, end: isize) -> String {
-        let char_vec: Vec<char> = str.chars().collect();
-        let char_vec_len = char_vec.len() as isize;
-        let start = if start < 0 {
-            let pos_start = char_vec_len + start;
-            if pos_start < 0 {
-                0
-            } else {
-                pos_start as usize
-            }
-        } else {
-            start as usize
+    fn get_range(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let key = parts.next().unwrap();
+        let start = match parts.next() {
+            Some(start_str) => match start_str.parse::<isize>() {
+                Ok(start) => start,
+                Err(_) => return "GetRange Error: Invalid start value".to_string(),
+            },
+            None => return "GetRange Error: Start not specified".to_string(),
+        };
+        let end = match parts.next() {
+            Some(end_str) => match end_str.parse::<isize>() {
+                Ok(end) => end,
+                Err(_) => return "GetRange Error: Invalid end value".to_string(),
+            },
+            None => return "GetRange Error: End not specified".to_string(),
         };
 
-        let end = if end < 0 {
-            let pos_end = char_vec_len + end + 1;
-            if pos_end < 0 {
-                1
-            } else {
-                pos_end as usize
-            }
-        } else {
-            if end >= char_vec_len {
-                char_vec_len as usize
-            } else {
-                min((end + 1) as usize, char_vec_len as usize)
-            }
-        };
-        if start > end {
-            "".to_string();
+        let key_value = self.get(key, db);
+        if key_value == "nil" {
+            return "".to_string();
         }
+        return StringCommand::slice_from_end(&key_value, start, end);
+    }
+
+    fn slice_from_end(str: &str, start: isize, end: isize) -> String {
+        if start > end {
+            return "".to_string();
+        }
+        let char_vec: Vec<char> = str.chars().collect();
+        let char_vec_len = char_vec.len() as isize;
+        let (start, end) = if start < 0 || end < 0 {
+            (
+                (char_vec_len + start).max(0) as usize,
+                (char_vec_len + end + 1).max(0) as usize,
+            )
+        } else {
+            (start as usize, (end + 1).min(char_vec_len) as usize)
+        };
         char_vec[start..end].iter().collect::<String>()
     }
 }
