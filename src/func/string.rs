@@ -3,7 +3,6 @@ use crate::db::DataType;
 use crate::db::Db;
 use crate::func::expired::get_key_expired;
 use crate::func::expired::ExpiredCommand;
-use std::cmp::min;
 use std::str::SplitAsciiWhitespace;
 
 enum SetError {
@@ -45,6 +44,22 @@ fn is_integer(s: &str) -> bool {
     s.parse::<i64>().is_ok()
 }
 
+fn get_parts(parts: &mut SplitAsciiWhitespace, get_value: bool) -> (String, String) {
+    let key = match parts.next() {
+        Some(key) => key.to_string(),
+        None => "".to_string(),
+    };
+    let value = if get_value {
+        match parts.next() {
+            Some(value) => value.to_string(),
+            None => "".to_string(),
+        }
+    } else {
+        "".to_string()
+    };
+    (key, value)
+}
+
 pub struct StringCommand {
     command: String,
 }
@@ -55,14 +70,13 @@ impl StringCommand {
     }
 
     fn append(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
-        let key = parts.next();
-        let value = parts.next();
-        if let (Some(key), Some(value)) = (key, value) {
-            let mut old_value = StringCommand::get(self, key, db);
+        let (key, value) = get_parts(parts, true);
+        if key != "" && value != "" {
+            let mut old_value = StringCommand::get(self, &key, db);
             if old_value == "nil" {
                 old_value = "".to_string();
             }
-            old_value.push_str(value);
+            old_value.push_str(&value);
             let len = old_value.len();
             db.set(key.to_string(), DataType::String(old_value));
             return format!("{}", len);
@@ -72,13 +86,13 @@ impl StringCommand {
     }
 
     fn get_del(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
-        let key = parts.next();
-        if let Some(key) = key {
-            let value = StringCommand::get(self, key, db);
+        let (key, _) = get_parts(parts, false);
+        if key != "" {
+            let value = StringCommand::get(self, &key, db);
             if value == "nil" {
                 return "nil".to_string();
             }
-            db.delete(key);
+            db.delete(&key);
             return value;
         } else {
             return "GetDel Error: Key not specified".to_string();
@@ -86,7 +100,7 @@ impl StringCommand {
     }
 
     fn get_ex(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
-        let key = parts.next();
+        let (key, _) = get_parts(parts, false);
         // ex px command
         let expired_command = ExpiredCommand::new("expired".to_string());
         // exat command
@@ -109,6 +123,7 @@ impl StringCommand {
         let mut error_str: Option<SetError> = None;
         while let Some(arg) = parts.next() {
             let lower_arg = arg.to_lowercase();
+            println!("lower_arg: {}", lower_arg);
             match lower_arg.as_str() {
                 "ex" => {
                     expired_count += 1;
@@ -154,8 +169,8 @@ impl StringCommand {
             }
         }
 
-        if let Some(key) = key {
-            let value = StringCommand::get(self, key, db);
+        if key != "" {
+            let value = StringCommand::get(self, &key, db);
             if value == "nil" {
                 return "nil".to_string();
             }
@@ -202,7 +217,7 @@ impl StringCommand {
                 }
             }
             if extra_args.persist.is_some() {
-                let result = general_command(db, &persist_command, key);
+                let result = general_command(db, &persist_command, &key);
                 if result != "1" {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
@@ -226,11 +241,10 @@ impl StringCommand {
     }
 
     fn get_set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
-        let key = parts.next();
-        let value = parts.next();
+        let (key, value) = get_parts(parts, true);
 
-        if let (Some(key), Some(value)) = (key, value) {
-            let old_value = StringCommand::get(self, key, db);
+        if key != "" && value != "" {
+            let old_value = StringCommand::get(self, &key, db);
             db.set(key.to_string(), DataType::String(value.to_string()));
             // if old_value is nil, return nil else return old_value
             if old_value == "nil" {
@@ -244,6 +258,7 @@ impl StringCommand {
     }
 
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let (key, mut value) = get_parts(parts, true);
         // ex px command
         let expired_command = ExpiredCommand::new("expired".to_string());
         // exat command
@@ -265,21 +280,16 @@ impl StringCommand {
         };
         // return value OK or old value
         let mut return_value = "OK".to_string();
-        let key = parts.next();
-        // Parse value
-        let mut value = parts.next().map(|s| s.to_string());
-        if let Some(ref mut value_str) = value {
-            if value_str.starts_with('"') && !value_str.ends_with('"') {
-                while let Some(part) = parts.next() {
-                    value_str.push_str(" ");
-                    value_str.push_str(part);
-                    if part.ends_with('"') {
-                        break;
-                    }
+        if value.starts_with('"') && !value.ends_with('"') {
+            while let Some(part) = parts.next() {
+                value.push_str(" ");
+                value.push_str(part);
+                if part.ends_with('"') {
+                    break;
                 }
             }
         }
-        let value = value.map(|s| s.trim_matches('"').to_string());
+        value = value.trim_matches('"').to_string();
         let mut error_str: Option<SetError> = None;
 
         // After parsing value, parse all remaining args
@@ -347,18 +357,18 @@ impl StringCommand {
         }
 
         // nx must not exist
-        if db.check_expired(key.unwrap()) && extra_args.nx.is_some() {
+        if db.check_expired(&key) && extra_args.nx.is_some() {
             return "Set Error: Key already exists".to_string();
         }
 
         // xx must exist
-        if !db.check_expired(key.unwrap()) && extra_args.xx.is_some() {
+        if !db.check_expired(&key) && extra_args.xx.is_some() {
             return "Set Error: Key does not exist".to_string();
         }
 
-        if let (Some(key), Some(value)) = (key, value) {
+        if key != "" {
             // if key exist and extra_args.get is true, return old value
-            let old_value = StringCommand::get(self, key, db);
+            let old_value = StringCommand::get(self, &key, db);
             if !old_value.is_empty() && extra_args.get.is_some() {
                 return_value = old_value;
             }
@@ -404,10 +414,10 @@ impl StringCommand {
                     error_str = Some(SetError::InvalidExpiredTime);
                 }
             }
-            let key_expired = get_key_expired(Some(key), db);
+            let key_expired = get_key_expired(Some(&key), db);
             // if key not expired and not expired time arg, set expired time to nil
             if !key_expired.is_empty() && expired_count == 0 && extra_args.keepttl.is_none() {
-                general_command(db, &persist_command, key);
+                general_command(db, &persist_command, &key);
             }
         } else {
             error_str = Some(SetError::KeyOfValueNotSpecified);
@@ -457,7 +467,10 @@ impl StringCommand {
             Accumulation::Incr => 1,
             Accumulation::Decr => -1,
         };
-        let key = parts.next();
+        let (key, _) = get_parts(parts, false);
+        if key == "" {
+            return "ERR wrong number of arguments for command".to_string();
+        }
         // is_by true get num value
         let num: Option<i128> = if is_by {
             match parts.next() {
@@ -473,7 +486,7 @@ impl StringCommand {
             None => return "ERR wrong number of arguments for command".to_string(),
         };
 
-        let old_value = StringCommand::get(self, key.unwrap(), db);
+        let old_value = StringCommand::get(self, &key, db);
 
         // old_value is nil
         let new_value = if old_value == "nil" {
@@ -500,15 +513,15 @@ impl StringCommand {
             }
         };
 
-        db.set(
-            key.unwrap().to_string(),
-            DataType::String(new_value.to_string()),
-        );
+        db.set(key.to_string(), DataType::String(new_value.to_string()));
         new_value.to_string()
     }
 
     fn get_range(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
-        let key = parts.next().unwrap();
+        let (key, _) = get_parts(parts, false);
+        if key == "" {
+            return "GetRange Error: Key not specified".to_string();
+        }
         let start = match parts.next() {
             Some(start_str) => match start_str.parse::<isize>() {
                 Ok(start) => start,
@@ -524,7 +537,7 @@ impl StringCommand {
             None => return "GetRange Error: End not specified".to_string(),
         };
 
-        let key_value = self.get(key, db);
+        let key_value = self.get(&key, db);
         if key_value == "nil" {
             return "".to_string();
         }
