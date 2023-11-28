@@ -580,6 +580,7 @@ impl Command for StringCommand {
             "getdel" => Ok(self.get_del(parts, db)),
             "getex" => Ok(self.get_ex(parts, db)),
             "incr" => Ok(self.handle_accumulation(parts, db, Accumulation::Incr, false)),
+            "incrby" => Ok(self.handle_accumulation(parts, db, Accumulation::Incr, true)),
             "getrange" => Ok(self.get_range(parts, db)),
             "getset" => Ok(self.get_set(parts, db)),
             "set" => Ok(self.set(parts, db)),
