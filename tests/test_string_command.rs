@@ -128,7 +128,7 @@ fn test_decr_command() -> Result<(), Box<dyn Error>> {
         (
             "key_int",
             "key_int",
-            "Decr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "234293482390480948029348230948",
             &decr_command,
         ),
@@ -142,7 +142,7 @@ fn test_decr_command() -> Result<(), Box<dyn Error>> {
         (
             "key_int",
             "key_int",
-            "Decr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "-9223372036854775808",
             &decr_command,
         ),
@@ -150,7 +150,7 @@ fn test_decr_command() -> Result<(), Box<dyn Error>> {
         (
             "key_not_int",
             "key_not_int",
-            "Decr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "1.1",
             &decr_command,
         ),
@@ -158,7 +158,7 @@ fn test_decr_command() -> Result<(), Box<dyn Error>> {
         (
             "key_not_int",
             "key_not_int",
-            "Decr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "abc",
             &decr_command,
         ),
@@ -252,7 +252,7 @@ fn test_decrby_command() -> Result<(), Box<dyn Error>> {
         (
             "key_int 2",
             "key_int",
-            "Decr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "234293482390480948029348230948",
             &decrby_command,
         ),
@@ -274,7 +274,7 @@ fn test_decrby_command() -> Result<(), Box<dyn Error>> {
         (
             "key_not_int 1",
             "key_not_int",
-            "Decr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "1.1",
             &decrby_command,
         ),
@@ -282,7 +282,7 @@ fn test_decrby_command() -> Result<(), Box<dyn Error>> {
         (
             "key_not_int 1",
             "key_not_int",
-            "Decr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "abc",
             &decrby_command,
         ),
@@ -310,7 +310,7 @@ fn test_decrby_command() -> Result<(), Box<dyn Error>> {
         (
             "key_min 2",
             "key_min",
-            "Decr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "-9223372036854775807",
             &decrby_command,
         ),
@@ -623,7 +623,7 @@ fn test_incr_command() -> Result<(), Box<dyn Error>> {
         (
             "key_int",
             "key_int",
-            "Incr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "234293482390480948029348230948",
             &incr_command,
         ),
@@ -645,7 +645,7 @@ fn test_incr_command() -> Result<(), Box<dyn Error>> {
         (
             "key_not_int",
             "key_not_int",
-            "Incr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "1.1",
             &incr_command,
         ),
@@ -653,7 +653,7 @@ fn test_incr_command() -> Result<(), Box<dyn Error>> {
         (
             "key_not_int",
             "key_not_int",
-            "Incr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "abc",
             &incr_command,
         ),
@@ -667,7 +667,7 @@ fn test_incr_command() -> Result<(), Box<dyn Error>> {
         (
             "key_max",
             "key_max",
-            "Incr Error: Value is not an integer or out of range",
+            "Value is not an integer or out of range",
             "9223372036854775807",
             &incr_command,
         ),
