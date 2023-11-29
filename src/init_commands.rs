@@ -1,7 +1,17 @@
 use std::collections::HashSet;
 
-pub const STRING_COMMANDS: [&str; 11] = [
-    "append", "decr", "decrby", "get", "getdel", "getex", "getrange", "getset", "incr", "incrby",
+pub const STRING_COMMANDS: [&str; 12] = [
+    "append",
+    "decr",
+    "decrby",
+    "get",
+    "getdel",
+    "getex",
+    "getrange",
+    "getset",
+    "incr",
+    "incrby",
+    "incrbyfloat",
     "set",
 ];
 pub const HASHMAP_COMMANDS: [&str; 2] = ["hmset", "hgetall"];

@@ -3,6 +3,10 @@ use crate::db::DataType;
 use crate::db::Db;
 use crate::func::expired::get_key_expired;
 use crate::func::expired::ExpiredCommand;
+use bigdecimal::BigDecimal;
+use std::ops::Add;
+// use rust_decimal::Decimal;
+use std::str::FromStr;
 use std::str::SplitAsciiWhitespace;
 
 enum SetError {
@@ -42,6 +46,17 @@ fn general_command(db: &mut Db, command_set: &ExpiredCommand, command_set_str: &
 
 fn is_integer(s: &str) -> bool {
     s.parse::<i64>().is_ok()
+}
+
+fn is_number(s: &str) -> bool {
+    s.parse::<f64>().is_ok()
+}
+
+fn parse_f64(s: &str) -> f64 {
+    match s.parse::<f64>() {
+        Ok(n) => n,
+        Err(_) => 0.0,
+    }
 }
 
 fn get_parts(parts: &mut SplitAsciiWhitespace, get_value: bool) -> (String, String) {
@@ -517,6 +532,41 @@ impl StringCommand {
         new_value.to_string()
     }
 
+    fn incrby_float(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let (key, value) = get_parts(parts, true);
+        if key == "" || value == "" {
+            return "ERR wrong number of arguments for command".to_string();
+        }
+        if !is_number(&value) {
+            return "Value is not a valid float".to_string();
+        }
+        let old_value = StringCommand::get(self, &key, db);
+        println!("old_value: {}", old_value);
+        let value_decimal = match BigDecimal::from_str(&value) {
+            Ok(n) => n,
+            Err(_) => return "Value is not a valid float".to_string(),
+        };
+        let new_value = if old_value == "nil" {
+            value_decimal
+        } else {
+            let old_value_decimal = match BigDecimal::from_str(&old_value) {
+                Ok(n) => n,
+                Err(_) => return "Value is not a valid float".to_string(),
+            };
+            let temp_sum = old_value_decimal.add(&value_decimal);
+
+            // check if temp_sum is out of range
+            let min = BigDecimal::from_str("-1.7E308").unwrap();
+            let max = BigDecimal::from_str("1.7E308").unwrap();
+            if temp_sum < min || temp_sum > max {
+                return "Value is not a valid float or out of range".to_string();
+            }
+            temp_sum
+        };
+        db.set(key.to_string(), DataType::String(new_value.to_string()));
+        new_value.to_string()
+    }
+
     fn get_range(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let (key, _) = get_parts(parts, false);
         if key == "" {
@@ -577,6 +627,7 @@ impl Command for StringCommand {
             "getex" => Ok(self.get_ex(parts, db)),
             "incr" => Ok(self.handle_accumulation(parts, db, Accumulation::Incr, false)),
             "incrby" => Ok(self.handle_accumulation(parts, db, Accumulation::Incr, true)),
+            "incrbyfloat" => Ok(self.incrby_float(parts, db)),
             "getrange" => Ok(self.get_range(parts, db)),
             "getset" => Ok(self.get_set(parts, db)),
             "set" => Ok(self.set(parts, db)),

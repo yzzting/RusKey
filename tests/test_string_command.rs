@@ -831,6 +831,120 @@ fn test_incrby_command() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_incrbyfloat_command() -> Result<(), Box<dyn Error>> {
+    // let mut db = Db::new();
+    // let incrbyfloat_command = StringCommand::new("incrbyfloat".to_string());
+    // let set_command = StringCommand::new("set".to_string());
+
+    // let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+    //     (
+    //         "key_not_incrbyfloat",
+    //         "key_not_incrbyfloat",
+    //         "ERR wrong number of arguments for command",
+    //         "",
+    //         &incrbyfloat_command,
+    //     ),
+    //     (
+    //         "key_not_incrbyfloat 1.1",
+    //         "key_not_incrbyfloat",
+    //         "1.1",
+    //         "1.1",
+    //         &incrbyfloat_command,
+    //     ),
+    //     ("key_float 10.1", "key_float", "OK", "10.1", &set_command),
+    //     (
+    //         "key_float 1.1",
+    //         "key_float",
+    //         "11.2",
+    //         "11.2",
+    //         &incrbyfloat_command,
+    //     ),
+    //     (
+    //         "key_float 2.1",
+    //         "key_float",
+    //         "13.3",
+    //         "13.3",
+    //         &incrbyfloat_command,
+    //     ),
+    //     (
+    //         "key_float -1.1",
+    //         "key_float",
+    //         "12.2",
+    //         "12.2",
+    //         &incrbyfloat_command,
+    //     ),
+    //     (
+    //         "key_float 1.0E308",
+    //         "key_float",
+    //         "OK",
+    //         "234293482390480948029348230948.1",
+    //         &set_command,
+    //     ),
+    //     (
+    //         "key_float 2.1",
+    //         "key_float",
+    //         "Value is not an integer or out of range",
+    //         "234293482390480948029348230948.1",
+    //         &incrbyfloat_command,
+    //     ),
+    //     (
+    //         "key_float 234293482390480948029348230948.1",
+    //         "key_float",
+    //         "OK",
+    //         "234293482390480948029348230948.1",
+    //         &set_command,
+    //     ),
+    //     (
+    //         "key_float -1.1",
+    //         "key_float",
+    //         "234293482390480948029348230947",
+    //         "234293482390480948029348230947",
+    //         &incrbyfloat_command,
+    //     ),
+    //     ("key_not_float 1", "key_not_float", "OK", "1", &set_command),
+    //     (
+    //         "key_not_float abc",
+    //         "key_not_float",
+    //         "Value is not an integer or out of range",
+    //         "1",
+    //         &incrbyfloat_command,
+    //     ),
+    //     (
+    //         "key_not_float abc",
+    //         "key_not_float",
+    //         "OK",
+    //         "abc",
+    //         &set_command,
+    //     ),
+    //     (
+    //         "key_not_float 1.1",
+    //         "key_not_float",
+    //         "Value is not an integer or out of range",
+    //         "abc",
+    //         &incrbyfloat_command,
+    //     ),
+    // ];
+
+    // for (args, key, expected_result, expected_value, command) in tests_case {
+    //     println!(
+    //         "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+    //         args, key, expected_result, expected_value
+    //     );
+    //     assert_command(
+    //         &mut db,
+    //         command,
+    //         args,
+    //         key,
+    //         expected_result,
+    //         expected_value,
+    //         None,
+    //         None,
+    //     )?;
+    // }
+    Ok(())
+}
+
+#[test]
 fn test_set_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
     let command = StringCommand::new("set".to_string());
