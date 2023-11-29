@@ -4,8 +4,6 @@ use crate::db::Db;
 use crate::func::expired::get_key_expired;
 use crate::func::expired::ExpiredCommand;
 use bigdecimal::BigDecimal;
-use std::ops::Add;
-// use rust_decimal::Decimal;
 use std::str::FromStr;
 use std::str::SplitAsciiWhitespace;
 
@@ -50,13 +48,6 @@ fn is_integer(s: &str) -> bool {
 
 fn is_number(s: &str) -> bool {
     s.parse::<f64>().is_ok()
-}
-
-fn parse_f64(s: &str) -> f64 {
-    match s.parse::<f64>() {
-        Ok(n) => n,
-        Err(_) => 0.0,
-    }
 }
 
 fn get_parts(parts: &mut SplitAsciiWhitespace, get_value: bool) -> (String, String) {
@@ -533,28 +524,28 @@ impl StringCommand {
     }
 
     fn incrby_float(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        // TODO Increment of boundary values is not yet handled
         let (key, value) = get_parts(parts, true);
         if key == "" || value == "" {
             return "ERR wrong number of arguments for command".to_string();
         }
         if !is_number(&value) {
-            return "Value is not a valid float".to_string();
+            return "Value is not an float or out of range".to_string();
         }
         let old_value = StringCommand::get(self, &key, db);
         println!("old_value: {}", old_value);
         let value_decimal = match BigDecimal::from_str(&value) {
             Ok(n) => n,
-            Err(_) => return "Value is not a valid float".to_string(),
+            Err(_) => return "Value is not an float or out of range".to_string(),
         };
         let new_value = if old_value == "nil" {
             value_decimal
         } else {
             let old_value_decimal = match BigDecimal::from_str(&old_value) {
                 Ok(n) => n,
-                Err(_) => return "Value is not a valid float".to_string(),
+                Err(_) => return "Value is not an float or out of range".to_string(),
             };
-            let temp_sum = old_value_decimal.add(&value_decimal);
-
+            let temp_sum = old_value_decimal + value_decimal;
             // check if temp_sum is out of range
             let min = BigDecimal::from_str("-1.7E308").unwrap();
             let max = BigDecimal::from_str("1.7E308").unwrap();
