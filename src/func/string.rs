@@ -601,6 +601,19 @@ impl StringCommand {
         };
         char_vec[start..end].iter().collect::<String>()
     }
+
+    fn str_len(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let (key, _) = get_parts(parts, false);
+        if key == "" {
+            return "StrLen Error: Key not specified".to_string();
+        }
+        let key_value = self.get(&key, db);
+        if key_value == "nil" || key_value == "" {
+            return "0".to_string();
+        }
+        let key_as_str = key_value.as_str();
+        return key_as_str.len().to_string();
+    }
 }
 
 impl Command for StringCommand {
@@ -622,6 +635,7 @@ impl Command for StringCommand {
             "getrange" => Ok(self.get_range(parts, db)),
             "getset" => Ok(self.get_set(parts, db)),
             "set" => Ok(self.set(parts, db)),
+            "strlen" => Ok(self.str_len(parts, db)),
             _ => Err("StringCommand Error: Command not found"),
         }
     }

@@ -1240,3 +1240,55 @@ fn test_getrange_command() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
+#[test]
+fn test_strlen_command() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+    let set_command = StringCommand::new("set".to_string());
+    let strlen_command = StringCommand::new("strlen".to_string());
+
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+        (
+            "key \"This is a string\"",
+            "key",
+            "OK",
+            "This is a string",
+            &set_command,
+        ),
+        ("key", "key", "16", "", &strlen_command),
+        ("key_not_exist", "key_not_exist", "0", "", &strlen_command),
+        ("key_num 10", "key_num", "OK", "10", &set_command),
+        ("key_num", "key_num", "2", "", &strlen_command),
+        ("key_num 100", "key_num", "OK", "100", &set_command),
+        ("key_num", "key_num", "3", "", &strlen_command),
+        ("key_empty \"\"", "key_empty", "OK", "", &set_command),
+        ("key_empty", "key_empty", "0", "", &strlen_command),
+        (
+            "key_unicode \"你好\"",
+            "key_unicode",
+            "OK",
+            "你好",
+            &set_command,
+        ),
+        ("key_unicode", "key_unicode", "6", "", &strlen_command),
+    ];
+
+    for (args, key, expected_result, expected_value, command) in tests_case {
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
+    }
+
+    Ok(())
+}
