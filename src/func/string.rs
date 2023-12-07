@@ -614,6 +614,46 @@ impl StringCommand {
         let key_as_str = key_value.as_str();
         return key_as_str.len().to_string();
     }
+
+    fn set_gange(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let (key, str_num) = get_parts(parts, true);
+        let new_value = match parts.next() {
+            Some(value) => value.to_string(),
+            None => "".to_string(),
+        };
+
+        let num = match str_num.parse::<usize>() {
+            Ok(n) => n,
+            Err(_) => return "ERR wrong number of arguments for command".to_string(),
+        };
+
+        if key.is_empty() || str_num.is_empty() || new_value.is_empty() || !is_integer(&str_num) {
+            return "ERR wrong number of arguments for command".to_string();
+        }
+
+        let mut old_value = self.get(&key, db);
+        // old value length nil is 0
+        let old_value_num = if old_value == "nil" {
+            old_value.clear();
+            0
+        } else {
+            old_value.len()
+        };
+        // old_value_num less than num supplementary space
+        if old_value_num < num {
+            old_value += &" ".repeat(num - old_value_num);
+        } else {
+            // replace old_value num to new_value with num
+            old_value.truncate(num);
+        }
+        old_value += &new_value;
+
+        let len = old_value.len();
+
+        db.set(key.to_string(), DataType::String(old_value));
+
+        len.to_string()
+    }
 }
 
 impl Command for StringCommand {
@@ -635,6 +675,7 @@ impl Command for StringCommand {
             "getrange" => Ok(self.get_range(parts, db)),
             "getset" => Ok(self.get_set(parts, db)),
             "set" => Ok(self.set(parts, db)),
+            "setrange" => Ok(self.set_gange(parts, db)),
             "strlen" => Ok(self.str_len(parts, db)),
             _ => Err("StringCommand Error: Command not found"),
         }

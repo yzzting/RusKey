@@ -1292,3 +1292,91 @@ fn test_strlen_command() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
+#[test]
+fn test_setrange_command() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+    let set_command = StringCommand::new("set".to_string());
+    let setrange_command = StringCommand::new("setrange".to_string());
+    let get_command = StringCommand::new("get".to_string());
+
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+        (
+            "key \"Hello World\"",
+            "key",
+            "OK",
+            "Hello World",
+            &set_command,
+        ),
+        ("key 6 Redis", "key", "11", "Hello Redis", &setrange_command),
+        ("key", "key", "Hello Redis", "", &get_command),
+        ("key_nil 6 Redis", "key", "11", "", &setrange_command),
+        // Set empty string
+        ("key_empty \"\"", "key_empty", "OK", "", &set_command),
+        (
+            "key_empty 6 Redis",
+            "key_empty",
+            "11",
+            "      Redis",
+            &setrange_command,
+        ),
+        ("key_empty", "key_empty", "      Redis", "", &get_command),
+        // Set short string
+        (
+            "key_short \"Hello\"",
+            "key_short",
+            "OK",
+            "Hello",
+            &set_command,
+        ),
+        (
+            "key_short 6 Redis",
+            "key_short",
+            "11",
+            "Hello Redis",
+            &setrange_command,
+        ),
+        ("key_short", "key_short", "Hello Redis", "", &get_command),
+        // Check lack arg
+        (
+            "key_lack_arg",
+            "key_lack_arg",
+            "ERR wrong number of arguments for command",
+            "",
+            &setrange_command,
+        ),
+        (
+            "key_lack_arg 6",
+            "key_lack_arg",
+            "ERR wrong number of arguments for command",
+            "",
+            &setrange_command,
+        ),
+        (
+            "key_lack_arg -1 Redis",
+            "key_lack_arg",
+            "ERR wrong number of arguments for command",
+            "",
+            &setrange_command,
+        ),
+    ];
+
+    for (args, key, expected_result, expected_value, command) in tests_case {
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
+    }
+
+    Ok(())
+}
