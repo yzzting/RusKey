@@ -1321,6 +1321,22 @@ fn test_setrange_command() -> Result<(), Box<dyn Error>> {
             &setrange_command,
         ),
         ("key_empty", "key_empty", "      Redis", "", &get_command),
+        // Set num greater than string length
+        (
+            "key_num \"Hello World\"",
+            "key_num",
+            "OK",
+            "Hello World",
+            &set_command,
+        ),
+        (
+            "key_num 13 Redis",
+            "key_num",
+            "18",
+            "Hello World  Redis",
+            &setrange_command,
+        ),
+        ("key_num", "key_num", "Hello World  Redis", "", &get_command),
         // Set short string
         (
             "key_short \"Hello\"",

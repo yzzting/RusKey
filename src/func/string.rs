@@ -627,30 +627,36 @@ impl StringCommand {
             Err(_) => return "ERR wrong number of arguments for command".to_string(),
         };
 
-        if key.is_empty() || str_num.is_empty() || new_value.is_empty() || !is_integer(&str_num) {
+        if new_value.is_empty() {
             return "ERR wrong number of arguments for command".to_string();
         }
 
         let mut old_value = self.get(&key, db);
         // old value length nil is 0
-        let old_value_num = if old_value == "nil" {
+        let old_value_len = if old_value == "nil" {
             old_value.clear();
             0
         } else {
             old_value.len()
         };
-        // old_value_num less than num supplementary space
-        if old_value_num < num {
-            old_value += &" ".repeat(num - old_value_num);
+        // calculate num and new_value length
+        let required_capacity = num + new_value.len();
+        let mut value_with_capacity = String::with_capacity(required_capacity);
+
+        if old_value_len < num {
+            let padding = " ".repeat(num - old_value_len);
+            value_with_capacity.push_str(&old_value);
+            value_with_capacity.push_str(&padding);
         } else {
-            // replace old_value num to new_value with num
-            old_value.truncate(num);
+            let truncate_value = &old_value[..num];
+            value_with_capacity.push_str(truncate_value);
         }
-        old_value += &new_value;
 
-        let len = old_value.len();
+        value_with_capacity.push_str(&new_value);
 
-        db.set(key.to_string(), DataType::String(old_value));
+        let len = value_with_capacity.len();
+
+        db.set(key.to_string(), DataType::String(value_with_capacity));
 
         len.to_string()
     }
