@@ -7,6 +7,8 @@ use bigdecimal::BigDecimal;
 use std::str::FromStr;
 use std::str::SplitAsciiWhitespace;
 
+const EMPTY: &str = "nil";
+
 enum SetError {
     InvalidExpiredTime,
     KeyOfValueNotSpecified,
@@ -79,7 +81,7 @@ impl StringCommand {
         let (key, value) = get_parts(parts, true);
         if key != "" && value != "" {
             let mut old_value = StringCommand::get(self, &key, db);
-            if old_value == "nil" {
+            if old_value == EMPTY {
                 old_value = "".to_string();
             }
             old_value.push_str(&value);
@@ -95,8 +97,8 @@ impl StringCommand {
         let (key, _) = get_parts(parts, false);
         if key != "" {
             let value = StringCommand::get(self, &key, db);
-            if value == "nil" {
-                return "nil".to_string();
+            if value == EMPTY {
+                return EMPTY.to_string();
             }
             db.delete(&key);
             return value;
@@ -177,8 +179,8 @@ impl StringCommand {
 
         if key != "" {
             let value = StringCommand::get(self, &key, db);
-            if value == "nil" {
-                return "nil".to_string();
+            if value == EMPTY {
+                return EMPTY.to_string();
             }
 
             // handle extra arg
@@ -253,8 +255,8 @@ impl StringCommand {
             let old_value = StringCommand::get(self, &key, db);
             db.set(key.to_string(), DataType::String(value.to_string()));
             // if old_value is nil, return nil else return old_value
-            if old_value == "nil" {
-                return "nil".to_string();
+            if old_value == EMPTY {
+                return EMPTY.to_string();
             } else {
                 return old_value;
             }
@@ -446,13 +448,13 @@ impl StringCommand {
     fn get(&self, key: &str, db: &mut Db) -> String {
         // check expired
         if !db.check_expired(key) {
-            return "nil".to_string();
+            return EMPTY.to_string();
         }
 
         let expired = get_key_expired(Some(key), db);
 
-        if expired == "nil" {
-            return "nil".to_string();
+        if expired == EMPTY {
+            return EMPTY.to_string();
         }
         match db.get(key) {
             Some(DataType::String(value)) => value.clone(),
@@ -495,7 +497,7 @@ impl StringCommand {
         let old_value = StringCommand::get(self, &key, db);
 
         // old_value is nil
-        let new_value = if old_value == "nil" {
+        let new_value = if old_value == EMPTY {
             // accumulation_str == Incr is 1 or Decr is -1
             accumulation_str
         } else {
@@ -538,7 +540,7 @@ impl StringCommand {
             Ok(n) => n,
             Err(_) => return "Value is not an float or out of range".to_string(),
         };
-        let new_value = if old_value == "nil" {
+        let new_value = if old_value == EMPTY {
             value_decimal
         } else {
             let old_value_decimal = match BigDecimal::from_str(&old_value) {
@@ -579,7 +581,7 @@ impl StringCommand {
         };
 
         let key_value = self.get(&key, db);
-        if key_value == "nil" {
+        if key_value == EMPTY {
             return "".to_string();
         }
         return StringCommand::slice_from_end(&key_value, start, end);
@@ -608,7 +610,7 @@ impl StringCommand {
             return "StrLen Error: Key not specified".to_string();
         }
         let key_value = self.get(&key, db);
-        if key_value == "nil" || key_value == "" {
+        if key_value == EMPTY || key_value == "" {
             return "0".to_string();
         }
         let key_as_str = key_value.as_str();
@@ -633,7 +635,7 @@ impl StringCommand {
 
         let mut old_value = self.get(&key, db);
         // old value length nil is 0
-        let old_value_len = if old_value == "nil" {
+        let old_value_len = if old_value == EMPTY {
             old_value.clear();
             0
         } else {
