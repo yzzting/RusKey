@@ -1396,3 +1396,133 @@ fn test_setrange_command() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
+#[test]
+fn fn_test_mset() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+    let mset_command = StringCommand::new("mset".to_string());
+    let get_command = StringCommand::new("get".to_string());
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+        (
+            "key1 value1 key2 value2",
+            "key1",
+            "OK",
+            "value1",
+            &mset_command,
+        ),
+        ("key1", "key1", "value1", "", &get_command),
+        ("key2", "key2", "value2", "", &get_command),
+        (
+            "key1 value1 key2 value2 key3 value3",
+            "key1",
+            "OK",
+            "value1",
+            &mset_command,
+        ),
+        ("key1", "key1", "value1", "", &get_command),
+        ("key2", "key2", "value2", "", &get_command),
+        ("key3", "key3", "value3", "", &get_command),
+        (
+            "key1 \"Hello value1\" key2 \"Hello value2\" key3 \"Hello value3\"",
+            "key1",
+            "OK",
+            "Hello value1",
+            &mset_command,
+        ),
+        (
+            "key1",
+            "key1",
+            "wrong number of arguments for 'mset' command",
+            "",
+            &mset_command,
+        ),
+        (
+            "key1 value1 key2",
+            "key1",
+            "wrong number of arguments for 'mset' command",
+            "",
+            &mset_command,
+        ),
+        // Test with empty string as key/value
+        ("key1 \"\" key2 value2", "key1", "OK", "", &mset_command),
+        ("key1", "key1", "", "", &get_command),
+        // Test with special characters in key/value
+        (
+            "key1 !@#$%^&*() key2 value2",
+            "key1",
+            "OK",
+            "!@#$%^&*()",
+            &mset_command,
+        ),
+        ("key1", "key1", "!@#$%^&*()", "", &get_command),
+        // Test with unicode characters in key/value
+        (
+            "key1 \"你好\" key2 value2",
+            "key1",
+            "OK",
+            "你好",
+            &mset_command,
+        ),
+        (
+            "key1",
+            "key1",
+            "你好",
+            "",
+            &get_command,
+        ),
+        // Test with a large number of key/value pairs
+        (
+            "key1 value1 key2 value2 key3 value3 key4 value4 key5 value5 key6 value6 key7 value7 key8 value8 key9 value9 key10 value10",
+            "key1",
+            "OK",
+            "value1",
+            &mset_command,
+        ),
+        (
+            "key10",
+            "key10",
+            "value10",
+            "",
+            &get_command,
+        ),
+        // Test with keys that have whitespaces
+        // (
+        //     "\"key 1\" value1 \"key 2\" value2",
+        //     "key 1",
+        //     "OK",
+        //     "value1",
+        //     &mset_command,
+        // ),
+        // (
+        //     "\"key 1\"",
+        //     "key 1",
+        //     "value1",
+        //     "",
+        //     &get_command,
+        // ),
+        // (
+        //     "\"key 2\"",
+        //     "key 2",
+        //     "value2",
+        //     "",
+        //     &get_command,
+        // ),
+    ];
+    for (args, key, expected_result, expected_value, command) in tests_case {
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
+    }
+    Ok(())
+}

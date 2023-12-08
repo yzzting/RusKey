@@ -662,6 +662,33 @@ impl StringCommand {
 
         len.to_string()
     }
+
+    fn mset(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let mut key_value_vec: Vec<(String, String)> = Vec::new();
+
+        while let Some(key) = parts.next() {
+            let value = match parts.next() {
+                Some(value) => value.to_string(),
+                None => return "wrong number of arguments for 'mset' command".to_string(),
+            };
+            let mut value = value.to_owned();
+            if value.starts_with('"') && !value.ends_with('"') {
+                while let Some(part) = parts.next() {
+                    value.push_str(" ");
+                    value.push_str(part);
+                    if part.ends_with('"') {
+                        break;
+                    }
+                }
+            }
+            value = value.trim_matches('"').to_owned();
+            key_value_vec.push((key.to_string(), value));
+        }
+        for (key, value) in key_value_vec {
+            db.set(key.to_string(), DataType::String(value.to_string()));
+        }
+        "OK".to_string()
+    }
 }
 
 impl Command for StringCommand {
@@ -683,6 +710,7 @@ impl Command for StringCommand {
             "getrange" => Ok(self.get_range(parts, db)),
             "getset" => Ok(self.get_set(parts, db)),
             "set" => Ok(self.set(parts, db)),
+            "mset" => Ok(self.mset(parts, db)),
             "setrange" => Ok(self.set_gange(parts, db)),
             "strlen" => Ok(self.str_len(parts, db)),
             _ => Err("StringCommand Error: Command not found"),

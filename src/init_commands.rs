@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-pub const STRING_COMMANDS: [&str; 14] = [
+pub const STRING_COMMANDS: [&str; 15] = [
     "append",
     "decr",
     "decrby",
@@ -13,6 +13,7 @@ pub const STRING_COMMANDS: [&str; 14] = [
     "incrby",
     "incrbyfloat",
     "set",
+    "mset",
     "setrange",
     "strlen",
 ];
