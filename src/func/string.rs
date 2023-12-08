@@ -68,6 +68,23 @@ fn get_parts(parts: &mut SplitAsciiWhitespace, get_value: bool) -> (String, Stri
     (key, value)
 }
 
+fn slice_from_end(str: &str, start: isize, end: isize) -> String {
+    if start > end {
+        return "".to_string();
+    }
+    let char_vec: Vec<char> = str.chars().collect();
+    let char_vec_len = char_vec.len() as isize;
+    let (start, end) = if start < 0 || end < 0 {
+        (
+            (char_vec_len + start).max(0) as usize,
+            (char_vec_len + end + 1).max(0) as usize,
+        )
+    } else {
+        (start as usize, (end + 1).min(char_vec_len) as usize)
+    };
+    char_vec[start..end].iter().collect::<String>()
+}
+
 pub struct StringCommand {
     command: String,
 }
@@ -584,24 +601,7 @@ impl StringCommand {
         if key_value == EMPTY {
             return "".to_string();
         }
-        return StringCommand::slice_from_end(&key_value, start, end);
-    }
-
-    fn slice_from_end(str: &str, start: isize, end: isize) -> String {
-        if start > end {
-            return "".to_string();
-        }
-        let char_vec: Vec<char> = str.chars().collect();
-        let char_vec_len = char_vec.len() as isize;
-        let (start, end) = if start < 0 || end < 0 {
-            (
-                (char_vec_len + start).max(0) as usize,
-                (char_vec_len + end + 1).max(0) as usize,
-            )
-        } else {
-            (start as usize, (end + 1).min(char_vec_len) as usize)
-        };
-        char_vec[start..end].iter().collect::<String>()
+        return slice_from_end(&key_value, start, end);
     }
 
     fn str_len(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
