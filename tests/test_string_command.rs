@@ -970,6 +970,14 @@ fn test_set_command() -> Result<(), Box<dyn Error>> {
         ("key value", "key", "OK", "value", None, None), // test with a single parameter
         ("key value1 value2", "key", "OK", "value1", None, None), // test with multiple parameters
         (
+            "\"key1 key2\" value",
+            "key1 key2",
+            "OK",
+            "value",
+            None,
+            None,
+        ), // test with a key containing spaces
+        (
             "key \"This is value\"",
             "key",
             "OK",
@@ -1486,27 +1494,27 @@ fn fn_test_mset() -> Result<(), Box<dyn Error>> {
             &get_command,
         ),
         // Test with keys that have whitespaces
-        // (
-        //     "\"key 1\" value1 \"key 2\" value2",
-        //     "key 1",
-        //     "OK",
-        //     "value1",
-        //     &mset_command,
-        // ),
-        // (
-        //     "\"key 1\"",
-        //     "key 1",
-        //     "value1",
-        //     "",
-        //     &get_command,
-        // ),
-        // (
-        //     "\"key 2\"",
-        //     "key 2",
-        //     "value2",
-        //     "",
-        //     &get_command,
-        // ),
+        (
+            "\"key 1\" value1 \"key 2\" value2",
+            "key 1",
+            "OK",
+            "value1",
+            &mset_command,
+        ),
+        (
+            "\"key 1\"",
+            "key 1",
+            "value1",
+            "",
+            &get_command,
+        ),
+        (
+            "\"key 2\"",
+            "key 2",
+            "value2",
+            "",
+            &get_command,
+        ),
     ];
     for (args, key, expected_result, expected_value, command) in tests_case {
         println!(

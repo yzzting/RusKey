@@ -52,12 +52,13 @@ fn is_number(s: &str) -> bool {
     s.parse::<f64>().is_ok()
 }
 
-fn get_parts(parts: &mut SplitAsciiWhitespace, get_value: bool) -> (String, String) {
+fn get_parts(parts: &mut SplitAsciiWhitespace, is_value: bool) -> (String, String) {
     let key = match parts.next() {
         Some(key) => key.to_string(),
         None => "".to_string(),
     };
-    let value = if get_value {
+    let key = get_value(key, parts);
+    let value = if is_value {
         match parts.next() {
             Some(value) => value.to_string(),
             None => "".to_string(),
@@ -66,6 +67,21 @@ fn get_parts(parts: &mut SplitAsciiWhitespace, get_value: bool) -> (String, Stri
         "".to_string()
     };
     (key, value)
+}
+
+fn get_value(value: String, parts: &mut SplitAsciiWhitespace) -> String {
+    let mut value = value;
+    if value.starts_with('"') && !value.ends_with('"') {
+        while let Some(part) = parts.next() {
+            value.push_str(" ");
+            value.push_str(part);
+            if part.ends_with('"') {
+                break;
+            }
+        }
+    }
+    value = value.trim_matches('"').to_string();
+    value
 }
 
 fn slice_from_end(str: &str, start: isize, end: isize) -> String {
@@ -97,7 +113,7 @@ impl StringCommand {
     fn append(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let (key, value) = get_parts(parts, true);
         if key != "" && value != "" {
-            let mut old_value = StringCommand::get(self, &key, db);
+            let mut old_value = self.get(false, parts, &key, db);
             if old_value == EMPTY {
                 old_value = "".to_string();
             }
@@ -113,7 +129,7 @@ impl StringCommand {
     fn get_del(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let (key, _) = get_parts(parts, false);
         if key != "" {
-            let value = StringCommand::get(self, &key, db);
+            let value = self.get(false, parts, &key, db);
             if value == EMPTY {
                 return EMPTY.to_string();
             }
@@ -195,7 +211,7 @@ impl StringCommand {
         }
 
         if key != "" {
-            let value = StringCommand::get(self, &key, db);
+            let value = self.get(false, parts, &key, db);
             if value == EMPTY {
                 return EMPTY.to_string();
             }
@@ -269,7 +285,7 @@ impl StringCommand {
         let (key, value) = get_parts(parts, true);
 
         if key != "" && value != "" {
-            let old_value = StringCommand::get(self, &key, db);
+            let old_value = self.get(false, parts, &key, db);
             db.set(key.to_string(), DataType::String(value.to_string()));
             // if old_value is nil, return nil else return old_value
             if old_value == EMPTY {
@@ -393,7 +409,7 @@ impl StringCommand {
 
         if key != "" {
             // if key exist and extra_args.get is true, return old value
-            let old_value = StringCommand::get(self, &key, db);
+            let old_value = self.get(false, parts, &key, db);
             if !old_value.is_empty() && extra_args.get.is_some() {
                 return_value = old_value;
             }
@@ -462,18 +478,30 @@ impl StringCommand {
         }
     }
 
-    fn get(&self, key: &str, db: &mut Db) -> String {
+    fn get(
+        &self,
+        is_parts: bool,
+        parts: &mut SplitAsciiWhitespace,
+        key: &str,
+        db: &mut Db,
+    ) -> String {
+        // if is_parts is true, get key from get_parts, else get key from key
+        let key = if is_parts {
+            let (key, _) = get_parts(parts, false);
+            key
+        } else {
+            key.to_string()
+        };
         // check expired
-        if !db.check_expired(key) {
+        if !db.check_expired(&key) {
             return EMPTY.to_string();
         }
-
-        let expired = get_key_expired(Some(key), db);
+        let expired = get_key_expired(Some(&key), db);
 
         if expired == EMPTY {
             return EMPTY.to_string();
         }
-        match db.get(key) {
+        match db.get(&key) {
             Some(DataType::String(value)) => value.clone(),
             _ => "There is no such key, the key is expired, or the data type is incorrect"
                 .to_string(),
@@ -511,7 +539,7 @@ impl StringCommand {
             None => return "ERR wrong number of arguments for command".to_string(),
         };
 
-        let old_value = StringCommand::get(self, &key, db);
+        let old_value = self.get(false, parts, &key, db);
 
         // old_value is nil
         let new_value = if old_value == EMPTY {
@@ -551,7 +579,7 @@ impl StringCommand {
         if !is_number(&value) {
             return "Value is not an float or out of range".to_string();
         }
-        let old_value = StringCommand::get(self, &key, db);
+        let old_value = self.get(false, parts, &key, db);
         println!("old_value: {}", old_value);
         let value_decimal = match BigDecimal::from_str(&value) {
             Ok(n) => n,
@@ -597,7 +625,7 @@ impl StringCommand {
             None => return "GetRange Error: End not specified".to_string(),
         };
 
-        let key_value = self.get(&key, db);
+        let key_value = self.get(false, parts, &key, db);
         if key_value == EMPTY {
             return "".to_string();
         }
@@ -609,7 +637,7 @@ impl StringCommand {
         if key == "" {
             return "StrLen Error: Key not specified".to_string();
         }
-        let key_value = self.get(&key, db);
+        let key_value = self.get(false, parts, &key, db);
         if key_value == EMPTY || key_value == "" {
             return "0".to_string();
         }
@@ -633,7 +661,7 @@ impl StringCommand {
             return "ERR wrong number of arguments for command".to_string();
         }
 
-        let mut old_value = self.get(&key, db);
+        let mut old_value = self.get(false, parts, &key, db);
         // old value length nil is 0
         let old_value_len = if old_value == EMPTY {
             old_value.clear();
@@ -667,21 +695,12 @@ impl StringCommand {
         let mut key_value_vec: Vec<(String, String)> = Vec::new();
 
         while let Some(key) = parts.next() {
+            let key = get_value(key.to_string(), parts);
             let value = match parts.next() {
                 Some(value) => value.to_string(),
                 None => return "wrong number of arguments for 'mset' command".to_string(),
             };
-            let mut value = value.to_owned();
-            if value.starts_with('"') && !value.ends_with('"') {
-                while let Some(part) = parts.next() {
-                    value.push_str(" ");
-                    value.push_str(part);
-                    if part.ends_with('"') {
-                        break;
-                    }
-                }
-            }
-            value = value.trim_matches('"').to_owned();
+            let value = get_value(value, parts);
             key_value_vec.push((key.to_string(), value));
         }
         for (key, value) in key_value_vec {
@@ -701,7 +720,7 @@ impl Command for StringCommand {
             "append" => Ok(self.append(parts, db)),
             "decr" => Ok(self.handle_accumulation(parts, db, Accumulation::Decr, false)),
             "decrby" => Ok(self.handle_accumulation(parts, db, Accumulation::Decr, true)),
-            "get" => Ok(self.get(parts.next().unwrap(), db)),
+            "get" => Ok(self.get(true, parts, "", db)),
             "getdel" => Ok(self.get_del(parts, db)),
             "getex" => Ok(self.get_ex(parts, db)),
             "incr" => Ok(self.handle_accumulation(parts, db, Accumulation::Incr, false)),
