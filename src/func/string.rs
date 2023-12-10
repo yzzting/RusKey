@@ -44,6 +44,15 @@ fn general_command(db: &mut Db, command_set: &ExpiredCommand, command_set_str: &
     return result_set.unwrap();
 }
 
+/**
+* Check if the string is quoted
+* @param {string} s
+* @returns {boolean}
+*/
+fn is_with_quotation_marks(s: &str) -> bool {
+    s.starts_with('"') && !s.ends_with('"')
+}
+
 fn is_integer(s: &str) -> bool {
     s.parse::<i64>().is_ok()
 }
@@ -60,7 +69,7 @@ fn get_parts(parts: &mut SplitAsciiWhitespace, is_value: bool) -> (String, Strin
     let key = get_value(key, parts);
     let value = if is_value {
         match parts.next() {
-            Some(value) => value.to_string(),
+            Some(value) => get_value(value.to_string(), parts),
             None => "".to_string(),
         }
     } else {
@@ -71,7 +80,7 @@ fn get_parts(parts: &mut SplitAsciiWhitespace, is_value: bool) -> (String, Strin
 
 fn get_value(value: String, parts: &mut SplitAsciiWhitespace) -> String {
     let mut value = value;
-    if value.starts_with('"') && !value.ends_with('"') {
+    if is_with_quotation_marks(value.as_str()) {
         while let Some(part) = parts.next() {
             value.push_str(" ");
             value.push_str(part);
@@ -299,7 +308,7 @@ impl StringCommand {
     }
 
     fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
-        let (key, mut value) = get_parts(parts, true);
+        let (key, value) = get_parts(parts, true);
         // ex px command
         let expired_command = ExpiredCommand::new("expired".to_string());
         // exat command
@@ -321,16 +330,6 @@ impl StringCommand {
         };
         // return value OK or old value
         let mut return_value = "OK".to_string();
-        if value.starts_with('"') && !value.ends_with('"') {
-            while let Some(part) = parts.next() {
-                value.push_str(" ");
-                value.push_str(part);
-                if part.ends_with('"') {
-                    break;
-                }
-            }
-        }
-        value = value.trim_matches('"').to_string();
         let mut error_str: Option<SetError> = None;
 
         // After parsing value, parse all remaining args
