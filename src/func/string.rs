@@ -121,7 +121,7 @@ impl StringCommand {
 
     fn append(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let (key, value) = get_parts(parts, true);
-        if key != "" && value != "" {
+        return if !key.is_empty() && !value.is_empty() {
             let mut old_value = self.get(false, parts, &key, db);
             if old_value == EMPTY {
                 old_value = "".to_string();
@@ -129,23 +129,23 @@ impl StringCommand {
             old_value.push_str(&value);
             let len = old_value.len();
             db.set(key.to_string(), DataType::String(old_value));
-            return format!("{}", len);
+            format!("{}", len)
         } else {
-            return "Append Error: Key or value not specified".to_string();
+            "Append Error: Key or value not specified".to_string()
         }
     }
 
     fn get_del(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let (key, _) = get_parts(parts, false);
-        if key != "" {
+        return if key != "" {
             let value = self.get(false, parts, &key, db);
             if value == EMPTY {
                 return EMPTY.to_string();
             }
             db.delete(&key);
-            return value;
+            value
         } else {
-            return "GetDel Error: Key not specified".to_string();
+            "GetDel Error: Key not specified".to_string()
         }
     }
 
@@ -219,7 +219,7 @@ impl StringCommand {
             }
         }
 
-        if key != "" {
+        return if !key.is_empty() {
             let value = self.get(false, parts, &key, db);
             if value == EMPTY {
                 return EMPTY.to_string();
@@ -276,34 +276,34 @@ impl StringCommand {
             if let Some(error_str) = error_str {
                 match error_str {
                     SetError::InvalidExpiredTime => {
-                        return "Set Error: Invalid expired time".to_string()
+                        "Set Error: Invalid expired time".to_string()
                     }
                     SetError::KeyOfValueNotSpecified => {
-                        return "Set Error: Key or value not specified".to_string()
+                        "Set Error: Key or value not specified".to_string()
                     }
                 }
             } else {
-                return value;
+                value
             }
         } else {
-            return "Key not specified".to_string();
+            "Key not specified".to_string()
         }
     }
 
     fn get_set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let (key, value) = get_parts(parts, true);
 
-        if key != "" && value != "" {
+        return if key != "" && value != "" {
             let old_value = self.get(false, parts, &key, db);
             db.set(key.to_string(), DataType::String(value.to_string()));
             // if old_value is nil, return nil else return old_value
             if old_value == EMPTY {
-                return EMPTY.to_string();
+                EMPTY.to_string()
             } else {
-                return old_value;
+                old_value
             }
         } else {
-            return "GetSet Error: Key or value not specified".to_string();
+            "GetSet Error: Key or value not specified".to_string()
         }
     }
 
@@ -463,17 +463,17 @@ impl StringCommand {
             error_str = Some(SetError::KeyOfValueNotSpecified);
         }
 
-        if let Some(error_str) = error_str {
+        return if let Some(error_str) = error_str {
             match error_str {
                 SetError::InvalidExpiredTime => {
-                    return "Set Error: Invalid expired time".to_string()
+                    "Set Error: Invalid expired time".to_string()
                 }
                 SetError::KeyOfValueNotSpecified => {
-                    return "Set Error: Key or value not specified".to_string()
+                    "Set Error: Key or value not specified".to_string()
                 }
             }
         } else {
-            return return_value.to_string();
+            return_value.to_string()
         }
     }
 
