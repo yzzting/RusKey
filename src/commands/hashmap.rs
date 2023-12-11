@@ -4,7 +4,7 @@ use std::str::SplitAsciiWhitespace;
 use crate::command_factory::Command;
 use crate::db::DataType;
 use crate::db::Db;
-use crate::func::expired::get_key_expired;
+use crate::commands::expired::get_key_expired;
 
 pub struct HashMapCommand {
     command: String,

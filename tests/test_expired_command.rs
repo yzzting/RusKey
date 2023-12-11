@@ -1,7 +1,7 @@
 use rus_key::command_factory::Command;
 use rus_key::db::Db;
-use rus_key::func::expired::ExpiredCommand;
-use rus_key::func::string::StringCommand;
+use rus_key::commands::expired::ExpiredCommand;
+use rus_key::commands::string::StringCommand;
 
 fn set_key(db: &mut Db) {
     // set expired key

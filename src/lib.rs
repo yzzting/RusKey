@@ -1,7 +1,7 @@
 pub mod args;
 pub mod command_factory;
 pub mod db;
-pub mod func;
+pub mod commands;
 pub mod init;
 pub mod init_commands;
 

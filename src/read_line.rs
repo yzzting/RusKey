@@ -2,7 +2,7 @@ use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
 use std::process;
 
-use crate::func::stream::Client;
+use crate::commands::stream::Client;
 use crate::init_commands::init_commands;
 use crate::Store;
 

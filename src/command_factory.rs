@@ -1,10 +1,10 @@
 use crate::db::Db;
-use crate::func::config::ConfigCommand;
-use crate::func::expired::ExpiredCommand;
-use crate::func::hashmap::HashMapCommand;
-use crate::func::ping::PingCommand;
-use crate::func::string::StringCommand;
-use crate::func::utils::UtilsCommand;
+use crate::commands::config::ConfigCommand;
+use crate::commands::expired::ExpiredCommand;
+use crate::commands::hashmap::HashMapCommand;
+use crate::commands::ping::PingCommand;
+use crate::commands::string::StringCommand;
+use crate::commands::utils::UtilsCommand;
 use crate::init_commands::{EXPIRED_COMMANDS, HASHMAP_COMMANDS, STRING_COMMANDS, UTILS_COMMANDS};
 use std::collections::HashMap;
 use std::str::SplitAsciiWhitespace;

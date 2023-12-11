@@ -1,8 +1,8 @@
 use crate::command_factory::Command;
 use crate::db::DataType;
 use crate::db::Db;
-use crate::func::expired::get_key_expired;
-use crate::func::expired::ExpiredCommand;
+use crate::commands::expired::get_key_expired;
+use crate::commands::expired::ExpiredCommand;
 use bigdecimal::BigDecimal;
 use std::str::FromStr;
 use std::str::SplitAsciiWhitespace;

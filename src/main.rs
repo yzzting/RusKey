@@ -2,7 +2,7 @@ mod args;
 mod cmd;
 mod command_factory;
 mod db;
-mod func;
+mod commands;
 mod init;
 mod init_commands;
 mod net;
