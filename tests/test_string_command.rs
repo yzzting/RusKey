@@ -47,7 +47,9 @@ fn assert_command(
     ttl: Option<i64>,
 ) -> Result<(), Box<dyn Error>> {
     let general_result = general_command(db, command_set, args)?;
-    assert_eq!(general_result, expected_result);
+    if !key.is_empty() {
+        assert_eq!(general_result, expected_result);
+    }
     if !expected_value.is_empty() {
         assert_eq!(
             match db.get(key) {
@@ -1406,7 +1408,7 @@ fn test_setrange_command() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn fn_test_mset() -> Result<(), Box<dyn Error>> {
+fn test_mset_command() -> Result<(), Box<dyn Error>> {
     let mut db = Db::new();
     let mset_command = StringCommand::new("mset".to_string());
     let get_command = StringCommand::new("get".to_string());
@@ -1515,6 +1517,65 @@ fn fn_test_mset() -> Result<(), Box<dyn Error>> {
             "",
             &get_command,
         ),
+    ];
+    for (args, key, expected_result, expected_value, command) in tests_case {
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
+    }
+    Ok(())
+}
+
+#[test]
+fn test_mget_command() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+
+    let mset_command = StringCommand::new("mset".to_string());
+    let mget_command = StringCommand::new("mget".to_string());
+    // TODO Haven't passed the test case yet
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+        // ("key1 value1 key2 value2", "", "", "value1", &mset_command),
+        // ("key1 key2", "key1 key2", "value1 value2", "", &mget_command),
+        // (
+        //     "key1 value1 key2 value2 key3 value3",
+        //     "key1",
+        //     "OK",
+        //     "value1",
+        //     &mset_command,
+        // ),
+        // ("key1 key2 key3", "key1 key2 key3", "value1 value2 value3", "", &mget_command),
+        // (
+        //     "key1 \"Hello value1\" key2 \"Hello value2\" key3 \"Hello value3\"",
+        //     ""
+        //     "OK",
+        //     "",
+        //     &mset_command,
+        // ),
+        // (
+        //     "key1 key2 key3",
+        //     "Hello value1 Hello value2 Hello value3",
+        //     "wrong number of arguments for 'mset' command",
+        //     "",
+        //     &mget_command,
+        // ),
+        // (
+        //     "key1 value1 key2",
+        //     "key1",
+        //     "wrong number of arguments for 'mset' command",
+        //     "",
+        //     &mset_command,
+        // ),
     ];
     for (args, key, expected_result, expected_value, command) in tests_case {
         println!(

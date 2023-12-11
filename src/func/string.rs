@@ -800,6 +800,20 @@ impl StringCommand {
         }
         "OK".to_string()
     }
+
+    fn mget(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+        let mut key_vec: Vec<String> = Vec::new();
+        while let Some(key) = parts.next() {
+            let key = get_value(key.to_string(), parts);
+            key_vec.push(key.to_string());
+        }
+        let mut value_vec: Vec<String> = Vec::new();
+        for key in key_vec {
+            let value = self.get(false, parts, &key, db);
+            value_vec.push(value);
+        }
+        value_vec.join("\n")
+    }
 }
 
 impl Command for StringCommand {
@@ -822,6 +836,7 @@ impl Command for StringCommand {
             "getset" => Ok(self.get_set(parts, db)),
             "set" => Ok(self.set(parts, db)),
             "mset" => Ok(self.mset(parts, db)),
+            "mget" => Ok(self.mget(parts, db)),
             "setrange" => Ok(self.set_gange(parts, db)),
             "strlen" => Ok(self.str_len(parts, db)),
             _ => Err("StringCommand Error: Command not found"),
