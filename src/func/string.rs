@@ -812,7 +812,7 @@ impl StringCommand {
             let value = self.get(false, parts, &key, db);
             value_vec.push(value);
         }
-        value_vec.join("\n")
+        value_vec.join(" ")
     }
 }
 

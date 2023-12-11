@@ -1543,39 +1543,45 @@ fn test_mget_command() -> Result<(), Box<dyn Error>> {
 
     let mset_command = StringCommand::new("mset".to_string());
     let mget_command = StringCommand::new("mget".to_string());
-    // TODO Haven't passed the test case yet
     let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
-        // ("key1 value1 key2 value2", "", "", "value1", &mset_command),
-        // ("key1 key2", "key1 key2", "value1 value2", "", &mget_command),
-        // (
-        //     "key1 value1 key2 value2 key3 value3",
-        //     "key1",
-        //     "OK",
-        //     "value1",
-        //     &mset_command,
-        // ),
-        // ("key1 key2 key3", "key1 key2 key3", "value1 value2 value3", "", &mget_command),
-        // (
-        //     "key1 \"Hello value1\" key2 \"Hello value2\" key3 \"Hello value3\"",
-        //     ""
-        //     "OK",
-        //     "",
-        //     &mset_command,
-        // ),
-        // (
-        //     "key1 key2 key3",
-        //     "Hello value1 Hello value2 Hello value3",
-        //     "wrong number of arguments for 'mset' command",
-        //     "",
-        //     &mget_command,
-        // ),
-        // (
-        //     "key1 value1 key2",
-        //     "key1",
-        //     "wrong number of arguments for 'mset' command",
-        //     "",
-        //     &mset_command,
-        // ),
+        ("key1 value1 key2 value2", "key1 key2", "OK", "", &mset_command),
+        ("key1 key2", "key1 key2", "value1 value2", "", &mget_command),
+        (
+            "key1 value1 key2 value2 key3 value3",
+            "key1 key2 key3",
+            "OK",
+            "",
+            &mset_command,
+        ),
+        ("key1 key2 key3", "key1 key2 key3", "value1 value2 value3", "", &mget_command),
+        (
+            "key1 \"Hello value1\" key2 \"Hello value2\" key3 \"Hello value3\"",
+            "key1 key2 key3",
+            "OK",
+            "",
+            &mset_command,
+        ),
+        (
+            "key1 key2 key3",
+            "key1 key2 key3",
+            "Hello value1 Hello value2 Hello value3",
+            "",
+            &mget_command,
+        ),
+        (
+            "key1 key2_not_exist key3_not_exist",
+            "key1_not_exist key2_not_exist key3_not_exist",
+            "Hello value1 nil nil",
+            "",
+            &mget_command,
+        ),
+        (
+            "key1_not_exist key2_not_exist key3_not_exist",
+            "key1_not_exist key2_not_exist key3_not_exist",
+            "nil nil nil",
+            "",
+            &mget_command,
+        ),
     ];
     for (args, key, expected_result, expected_value, command) in tests_case {
         println!(
