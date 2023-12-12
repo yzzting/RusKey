@@ -278,6 +278,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "expired_commands"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rus_key_lib",
+]
+
+[[package]]
 name = "fd-lock"
 version = "3.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -631,6 +639,7 @@ dependencies = [
  "bigdecimal",
  "chrono",
  "clap",
+ "expired_commands",
  "rand",
  "regex",
  "rus_key_lib",
@@ -750,6 +759,7 @@ name = "string_commands"
 version = "0.1.0"
 dependencies = [
  "bigdecimal",
+ "expired_commands",
  "rus_key_lib",
 ]
 
