@@ -3,6 +3,7 @@ mod cmd;
 mod command_factory;
 mod db;
 mod commands;
+mod command_trait;
 mod init;
 mod init_commands;
 mod net;

@@ -1,4 +1,4 @@
-use crate::db::Db;
+use crate::command_trait::Command;
 use crate::commands::config::ConfigCommand;
 use crate::commands::expired::ExpiredCommand;
 use crate::commands::hashmap::HashMapCommand;
@@ -7,15 +7,6 @@ use crate::commands::string::StringCommand;
 use crate::commands::utils::UtilsCommand;
 use crate::init_commands::{EXPIRED_COMMANDS, HASHMAP_COMMANDS, STRING_COMMANDS, UTILS_COMMANDS};
 use std::collections::HashMap;
-use std::str::SplitAsciiWhitespace;
-
-pub trait Command: Send + Sync {
-    fn execute(
-        &self,
-        parts: &mut SplitAsciiWhitespace,
-        db: &mut Db,
-    ) -> Result<String, &'static str>;
-}
 
 pub struct CommandFactory {
     commands: HashMap<String, Box<dyn Command>>,

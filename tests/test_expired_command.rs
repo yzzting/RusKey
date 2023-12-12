@@ -1,4 +1,4 @@
-use rus_key::command_factory::Command;
+use rus_key::command_trait::Command;
 use rus_key::db::Db;
 use rus_key::commands::expired::ExpiredCommand;
 use rus_key::commands::string::StringCommand;

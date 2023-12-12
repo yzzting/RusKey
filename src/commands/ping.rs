@@ -1,4 +1,4 @@
-use crate::command_factory::Command;
+use crate::command_trait::Command;
 use crate::db::Db;
 use std::str::SplitAsciiWhitespace;
 
