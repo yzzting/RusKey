@@ -633,8 +633,17 @@ dependencies = [
  "clap",
  "rand",
  "regex",
+ "rus_key_lib",
  "rustyline",
+ "string_commands",
  "tokio",
+]
+
+[[package]]
+name = "rus_key_lib"
+version = "0.1.0"
+dependencies = [
+ "rand",
 ]
 
 [[package]]
@@ -735,6 +744,14 @@ name = "str-buf"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e08d8363704e6c71fc928674353e6b7c23dcea9d82d7012c8faf2a3a025f8d0"
+
+[[package]]
+name = "string_commands"
+version = "0.1.0"
+dependencies = [
+ "bigdecimal",
+ "rus_key_lib",
+]
 
 [[package]]
 name = "strsim"
