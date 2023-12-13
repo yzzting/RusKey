@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::str::SplitAsciiWhitespace;
 
 use rus_key_trait::command_trait::Command;
-use rus_key_trait::db_trait::{Db, DataType};
+use rus_key_db::db::{Db, DataType};
 
 const EXPIRED: &str = "expired";
 
@@ -15,7 +15,7 @@ impl UtilsCommand {
         UtilsCommand { command }
     }
 
-    fn check_expired(&self, key: Option<&str>, db: &mut dyn Db) -> String {
+    fn check_expired(&self, key: Option<&str>, db: &mut Db) -> String {
         let key = match key {
             Some(key) => key,
             None => return "0".to_string(),
@@ -31,7 +31,7 @@ impl UtilsCommand {
         old_name: Option<&str>,
         new_name: Option<&str>,
         type_str: &str,
-        db: &mut dyn Db,
+        db: &mut Db,
     ) -> Result<String, &'static str> {
         let old_name = match old_name {
             Some(old_name) => old_name,
@@ -82,7 +82,7 @@ impl UtilsCommand {
         Ok("1".to_string())
     }
 
-    fn check_type(&self, key: Option<&str>, db: &mut dyn Db) -> String {
+    fn check_type(&self, key: Option<&str>, db: &mut Db) -> String {
         let key = match key {
             Some(key) => key,
             None => return "none".to_string(),
@@ -100,14 +100,14 @@ impl UtilsCommand {
         }
     }
 
-    fn randomkey(&self, db: &mut dyn Db) -> String {
+    fn randomkey(&self, db: &mut Db) -> String {
         match db.randomkey() {
             Some(key) => key,
             None => "nil".to_string(),
         }
     }
 
-    fn del_key(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
+    fn del_key(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let mut count = 0;
         while let Some(key) = parts.next() {
             if db.delete(key) {
@@ -122,7 +122,7 @@ impl Command for UtilsCommand {
     fn execute(
         &self,
         parts: &mut SplitAsciiWhitespace,
-        db: &mut dyn Db,
+        db: &mut Db,
     ) -> Result<String, &'static str> {
         match self.command.as_str() {
             "exists" => Ok(self.check_expired(parts.next(), db)),

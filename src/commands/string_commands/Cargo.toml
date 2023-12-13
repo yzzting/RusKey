@@ -7,6 +7,11 @@ edition = "2021"
 
 [dependencies]
 bigdecimal = "0.4.2"
+
+# db crate
+rus_key_db = { path = "../../db" }
+
+# trait crate
 rus_key_trait = { path = "../../trait" }
 
 # command crate

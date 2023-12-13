@@ -1,5 +1,5 @@
 use rus_key_trait::command_trait::Command;
-use rus_key_lib::db::{DataType, Db};
+use rus_key_db::db::{DataType, Db};
 use config_commands::config::ConfigCommand;
 use rus_key_lib::init;
 

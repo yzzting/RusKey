@@ -1,5 +1,5 @@
 use std::str::SplitAsciiWhitespace;
-use rus_key_trait::db_trait::{Db, DataType};
+use rus_key_db::db::Db;
 use expired_commands::expired::ExpiredCommand;
 use rus_key_trait::command_trait::Command;
 
@@ -36,7 +36,7 @@ pub fn is_with_quotation_marks(s: &str) -> bool {
 /// # Returns
 ///
 /// * A string representing the result of the command execution.
-pub fn general_command(db: &mut dyn Db, command_set: &ExpiredCommand, command_set_str: &str) -> String {
+pub fn general_command(db: &mut Db, command_set: &ExpiredCommand, command_set_str: &str) -> String {
     let mut parts_set = command_set_str.split_ascii_whitespace();
     let result_set = command_set.execute(&mut parts_set, db);
     return result_set.unwrap();

@@ -1,6 +1,5 @@
 use rus_key_lib::args::Opt;
-use rus_key_lib::db::DataType;
-use rus_key_lib::db::Db;
+use rus_key_db::db::{Db, DataType};
 use rus_key_lib::init::{Config, init, Store};
 use rus_key_lib::net::handle_client;
 use rus_key_lib::read_line::read_line;

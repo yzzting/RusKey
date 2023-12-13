@@ -4,11 +4,11 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 // use std::sync::{Arc, Mutex};
 use crate::cmd;
 use rus_key_factory::command_factory::CommandFactory;
-use rus_key_trait::db_trait::Db;
+use rus_key_db::db::Db;
 use std::str;
 use tokio::net::TcpStream;
 
-pub async fn handle_client(mut stream: TcpStream, db: &mut dyn Db) -> Result<()> {
+pub async fn handle_client(mut stream: TcpStream, db: &mut Db) -> Result<()> {
     let mut buffer = [0; 512]; // read up to 512 bytes
     loop {
         let bytes_read = stream.read(&mut buffer).await.map_err(|e| {

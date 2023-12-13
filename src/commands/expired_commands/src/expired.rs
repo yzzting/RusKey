@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::str::SplitAsciiWhitespace;
 
 use rus_key_trait::command_trait::Command;
-use rus_key_trait::db_trait::{Db, DataType};
+use rus_key_db::db::{Db, DataType};
 
 const EXPIRED: &str = "expired";
 
@@ -19,7 +19,7 @@ fn splice_time(expired: i64) -> i64 {
     expired_time
 }
 
-fn get_expired_map(db: &mut dyn Db) -> HashMap<String, String> {
+fn get_expired_map(db: &mut Db) -> HashMap<String, String> {
     let expired_map = match db.get(EXPIRED) {
         Some(DataType::HashMap(expired_map)) => expired_map.clone(),
         None => HashMap::new(),
@@ -28,7 +28,7 @@ fn get_expired_map(db: &mut dyn Db) -> HashMap<String, String> {
     expired_map
 }
 
-pub fn get_key_expired(key: Option<&str>, db: &mut dyn Db) -> String {
+pub fn get_key_expired(key: Option<&str>, db: &mut Db) -> String {
     let key = match key {
         Some(key) => key,
         None => return "No such key".to_string(),
@@ -67,7 +67,7 @@ impl ExpiredCommand {
         key: Option<&str>,
         value: Option<&str>,
         type_str: &str,
-        db: &mut dyn Db,
+        db: &mut Db,
     ) -> Result<String, &'static str> {
         let key = match key {
             Some(key) => key,
@@ -107,7 +107,7 @@ impl ExpiredCommand {
         Ok("OK".to_string())
     }
 
-    fn del_key_expired(&self, key: Option<&str>, db: &mut dyn Db) -> String {
+    fn del_key_expired(&self, key: Option<&str>, db: &mut Db) -> String {
         let key = match key {
             Some(key) => key,
             None => return "0".to_string(),
@@ -125,7 +125,7 @@ impl ExpiredCommand {
         "1".to_string()
     }
 
-    fn handle_ttl(&self, key: Option<&str>, type_str: &str, db: &mut dyn Db) -> i64 {
+    fn handle_ttl(&self, key: Option<&str>, type_str: &str, db: &mut Db) -> i64 {
         let key = match key {
             Some(key) => key,
             None => return -2,
@@ -161,7 +161,7 @@ impl Command for ExpiredCommand {
     fn execute(
         &self,
         parts: &mut SplitAsciiWhitespace,
-        db: &mut dyn Db,
+        db: &mut Db,
     ) -> Result<String, &'static str> {
         match self.command.as_str() {
             "expired" => {

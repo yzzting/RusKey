@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::str::SplitAsciiWhitespace;
 
 use rus_key_trait::command_trait::Command;
-use rus_key_trait::db_trait::{Db, DataType};
+use rus_key_db::db::{Db, DataType};
 use expired_commands::expired::get_key_expired;
 
 pub struct HashMapCommand {
@@ -14,7 +14,7 @@ impl HashMapCommand {
         HashMapCommand { command }
     }
 
-    fn hmset(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> Result<String, &'static str> {
+    fn hmset(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
         let key = match parts.next() {
             Some(key) => key,
             None => return Err("Key not specified"),
@@ -34,7 +34,7 @@ impl HashMapCommand {
     fn hgetall(
         &self,
         parts: &mut SplitAsciiWhitespace,
-        db: &mut dyn Db,
+        db: &mut Db,
     ) -> Result<String, &'static str> {
         let key = match parts.next() {
             Some(key) => key,
@@ -65,7 +65,7 @@ impl Command for HashMapCommand {
     fn execute(
         &self,
         parts: &mut SplitAsciiWhitespace,
-        db: &mut dyn Db,
+        db: &mut Db,
     ) -> Result<String, &'static str> {
         match self.command.as_str() {
             "hmset" => self.hmset(parts, db),

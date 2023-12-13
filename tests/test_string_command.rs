@@ -1,5 +1,5 @@
 use rus_key_trait::command_trait::Command;
-use rus_key_lib::db::{DataType, Db};
+use rus_key_db::db::{DataType, Db};
 use expired_commands::expired::ExpiredCommand;
 use string_commands::string::StringCommand;
 use utils_commands::utils::UtilsCommand;
