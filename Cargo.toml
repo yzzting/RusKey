@@ -10,6 +10,7 @@ edition = "2021"
 string_commands = { version = "0.1.0", path = "./src/commands/string_commands" }
 expired_commands = { version = "0.1.0", path = "./src/commands/expired_commands" }
 config_commands = { version = "0.1.0", path = "./src/commands/config_commands" }
+hashmap_commands = { version = "0.1.0", path = "src/commands/hashmap" }
 # lib crate
 rus_key_lib = { version = "0.1.0", path = "./src/lib" }
 clap = { version = "4.4.6", features = ["derive"] }
@@ -29,4 +30,5 @@ members = [
     "src/commands/string_commands",
     "src/commands/expired_commands",
     "src/commands/config_commands",
+    "src/commands/hashmap",
 ]
