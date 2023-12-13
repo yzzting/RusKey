@@ -2,11 +2,11 @@ use rus_key_trait::command_trait::Command;
 use rus_key_db::db::{Db, DataType};
 use expired_commands::expired::{ExpiredCommand, get_key_expired};
 use crate::utils::{is_integer, general_command, get_value, get_parts, is_number, slice_from_end};
+use crate::get::get;
+use crate::r#const::EMPTY;
 use bigdecimal::BigDecimal;
 use std::str::FromStr;
 use std::str::SplitAsciiWhitespace;
-
-const EMPTY: &str = "nil";
 
 enum SetError {
     InvalidExpiredTime,
@@ -49,7 +49,7 @@ impl StringCommand {
     fn append(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let (key, value) = get_parts(parts, true);
         return if !key.is_empty() && !value.is_empty() {
-            let mut old_value = self.get(false, parts, &key, db);
+            let mut old_value = get(false, parts, &key, db);
             if old_value == EMPTY {
                 old_value = "".to_string();
             }
@@ -65,7 +65,7 @@ impl StringCommand {
     fn get_del(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         let (key, _) = get_parts(parts, false);
         return if key != "" {
-            let value = self.get(false, parts, &key, db);
+            let value = get(false, parts, &key, db);
             if value == EMPTY {
                 return EMPTY.to_string();
             }
@@ -147,7 +147,7 @@ impl StringCommand {
         }
 
         return if !key.is_empty() {
-            let value = self.get(false, parts, &key, db);
+            let value = get(false, parts, &key, db);
             if value == EMPTY {
                 return EMPTY.to_string();
             }
@@ -221,7 +221,7 @@ impl StringCommand {
         let (key, value) = get_parts(parts, true);
 
         return if key != "" && value != "" {
-            let old_value = self.get(false, parts, &key, db);
+            let old_value = get(false, parts, &key, db);
             db.set(key.to_string(), DataType::String(value.to_string()));
             // if old_value is nil, return nil else return old_value
             if old_value == EMPTY {
@@ -335,7 +335,7 @@ impl StringCommand {
 
         if key != "" {
             // if key exist and extra_args.get is true, return old value
-            let old_value = self.get(false, parts, &key, db);
+            let old_value = get(false, parts, &key, db);
             if !old_value.is_empty() && extra_args.get.is_some() {
                 return_value = old_value;
             }
@@ -404,36 +404,6 @@ impl StringCommand {
         }
     }
 
-    fn get(
-        &self,
-        is_parts: bool,
-        parts: &mut SplitAsciiWhitespace,
-        key: &str,
-        db: &mut Db,
-    ) -> String {
-        // if is_parts is true, get key from get_parts, else get key from key
-        let key = if is_parts {
-            let (key, _) = get_parts(parts, false);
-            key
-        } else {
-            key.to_string()
-        };
-        // check expired
-        if !db.check_expired(&key) {
-            return EMPTY.to_string();
-        }
-        let expired = get_key_expired(Some(&key), db);
-
-        if expired == EMPTY {
-            return EMPTY.to_string();
-        }
-        match db.get(&key) {
-            Some(DataType::String(value)) => value.clone(),
-            _ => "There is no such key, the key is expired, or the data type is incorrect"
-                .to_string(),
-        }
-    }
-
     fn handle_accumulation(
         &self,
         parts: &mut SplitAsciiWhitespace,
@@ -465,7 +435,7 @@ impl StringCommand {
             None => return "ERR wrong number of arguments for command".to_string(),
         };
 
-        let old_value = self.get(false, parts, &key, db);
+        let old_value = get(false, parts, &key, db);
 
         // old_value is nil
         let new_value = if old_value == EMPTY {
@@ -505,7 +475,7 @@ impl StringCommand {
         if !is_number(&value) {
             return "Value is not an float or out of range".to_string();
         }
-        let old_value = self.get(false, parts, &key, db);
+        let old_value = get(false, parts, &key, db);
         println!("old_value: {}", old_value);
         let value_decimal = match BigDecimal::from_str(&value) {
             Ok(n) => n,
@@ -551,7 +521,7 @@ impl StringCommand {
             None => return "GetRange Error: End not specified".to_string(),
         };
 
-        let key_value = self.get(false, parts, &key, db);
+        let key_value = get(false, parts, &key, db);
         if key_value == EMPTY {
             return "".to_string();
         }
@@ -563,7 +533,7 @@ impl StringCommand {
         if key == "" {
             return "StrLen Error: Key not specified".to_string();
         }
-        let key_value = self.get(false, parts, &key, db);
+        let key_value = get(false, parts, &key, db);
         if key_value == EMPTY || key_value == "" {
             return "0".to_string();
         }
@@ -587,7 +557,7 @@ impl StringCommand {
             return "ERR wrong number of arguments for command".to_string();
         }
 
-        let mut old_value = self.get(false, parts, &key, db);
+        let mut old_value = get(false, parts, &key, db);
         // old value length nil is 0
         let old_value_len = if old_value == EMPTY {
             old_value.clear();
@@ -643,7 +613,7 @@ impl StringCommand {
         }
         let mut value_vec: Vec<String> = Vec::new();
         for key in key_vec {
-            let value = self.get(false, parts, &key, db);
+            let value = get(false, parts, &key, db);
             value_vec.push(value);
         }
         value_vec.join(" ")
@@ -660,7 +630,7 @@ impl Command for StringCommand {
             "append" => Ok(self.append(parts, db)),
             "decr" => Ok(self.handle_accumulation(parts, db, Accumulation::Decr, false)),
             "decrby" => Ok(self.handle_accumulation(parts, db, Accumulation::Decr, true)),
-            "get" => Ok(self.get(true, parts, "", db)),
+            "get" => Ok(get(true, parts, "", db)),
             "getdel" => Ok(self.get_del(parts, db)),
             "getex" => Ok(self.get_ex(parts, db)),
             "incr" => Ok(self.handle_accumulation(parts, db, Accumulation::Incr, false)),
