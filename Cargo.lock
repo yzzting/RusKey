@@ -293,6 +293,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "factory"
+version = "0.1.0"
+dependencies = [
+ "config_commands",
+ "expired_commands",
+ "hashmap_commands",
+ "ping_commands",
+ "rus_key_lib",
+ "string_commands",
+ "utils_commands",
+]
+
+[[package]]
 name = "fd-lock"
 version = "3.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -663,6 +676,7 @@ dependencies = [
  "clap",
  "config_commands",
  "expired_commands",
+ "factory",
  "hashmap_commands",
  "ping_commands",
  "rand",

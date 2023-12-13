@@ -1,0 +1,18 @@
+[package]
+name = "factory"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# commands crate
+config_commands = { path = "../commands/config_commands" }
+expired_commands = { path = "../commands/expired_commands" }
+hashmap_commands = { path = "../commands/hashmap_commands" }
+ping_commands = { path = "../commands/ping_commands" }
+string_commands = { path = "../commands/string_commands" }
+utils_commands = { path = "../commands/utils_commands" }
+
+# lib crate
+rus_key_lib = { path = "../lib" }

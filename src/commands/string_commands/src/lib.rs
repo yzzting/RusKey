@@ -1,2 +1,2 @@
-mod string;
+pub mod string;
 mod utils;
