@@ -1,11 +1,11 @@
-use crate::db::Db;
+use rus_key_trait::db_trait::Db;
 use std::str::SplitAsciiWhitespace;
 
-use crate::command_factory::CommandFactory;
+use rus_key_factory::command_factory::CommandFactory;
 
 pub fn handle_command(
     parts: &mut SplitAsciiWhitespace,
-    db: &mut Db,
+    db: &mut dyn Db,
     factory: &CommandFactory,
 ) -> Result<String, &'static str> {
     let cmd = match parts.next() {

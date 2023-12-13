@@ -1,7 +1,7 @@
 use std::str::SplitAsciiWhitespace;
 
-use rus_key_lib::command_trait::Command;
-use rus_key_lib::db::{Db, DataType};
+use rus_key_trait::command_trait::Command;
+use rus_key_trait::db_trait::{Db, DataType};
 
 const CANNOT_MODIFY: [&str; 2] = ["port", "host"];
 
@@ -12,7 +12,7 @@ fn get_next_arg(parts: &mut SplitAsciiWhitespace) -> Result<String, &'static str
     }
 }
 
-// pub fn handle_config(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
+// pub fn handle_config(parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> Result<String, &'static str> {
 //     let arg = get_next_arg(parts)?;
 //     match arg.as_str() {
 //         "get" => {
@@ -65,7 +65,7 @@ impl ConfigCommand {
         ConfigCommand {}
     }
 
-    fn get(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
+    fn get(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> Result<String, &'static str> {
         let value = get_next_arg(parts)?;
         let btree_map = match db.get("ruskey_config") {
             Some(DataType::ZSet(btree_map)) => btree_map,
@@ -87,7 +87,7 @@ impl ConfigCommand {
         Ok(result.trim().to_string())
     }
 
-    fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
+    fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> Result<String, &'static str> {
         let field = get_next_arg(parts)?;
         let value = get_next_arg(parts)?;
         let mut btree_map = match db.get("ruskey_config") {
@@ -112,7 +112,7 @@ impl Command for ConfigCommand {
     fn execute(
         &self,
         parts: &mut SplitAsciiWhitespace,
-        db: &mut Db,
+        db: &mut dyn Db,
     ) -> Result<String, &'static str> {
         let arg = get_next_arg(parts)?;
         match arg.as_str() {

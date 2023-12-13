@@ -1,8 +1,8 @@
-use rus_key::command_trait::Command;
-use rus_key::db::Db;
-use rus_key::commands::hashmap::HashMapCommand;
-use rus_key::commands::string::StringCommand;
-use rus_key::commands::utils::UtilsCommand;
+use rus_key_trait::command_trait::Command;
+use rus_key_lib::db::{DataType, Db};
+use hashmap_commands::hashmap::HashMapCommand;
+use string_commands::string::StringCommand;
+use utils_commands::utils::UtilsCommand;
 
 fn set_key(db: &mut Db) {
     // set key

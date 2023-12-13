@@ -3,6 +3,10 @@ use std::fs;
 
 use crate::args::Opt;
 
+pub struct Store {
+    pub url: String,
+}
+
 pub fn init() -> BTreeMap<String, String> {
     // fs read config file ./ruskey.conf
     let content = match fs::read_to_string("./ruskey.conf") {

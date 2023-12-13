@@ -1,34 +1,19 @@
-mod args;
-mod cmd;
-mod command_factory;
-mod db;
-mod commands;
-mod command_trait;
-mod init;
-mod init_commands;
-mod net;
-mod read_line;
-
-use crate::args::Opt;
-use crate::db::DataType;
-use crate::db::Db;
-use crate::init::Config;
-use crate::net::handle_client;
-use crate::read_line::read_line;
+use rus_key_lib::args::Opt;
+use rus_key_lib::db::DataType;
+use rus_key_lib::db::Db;
+use rus_key_lib::init::{Config, init, Store};
+use rus_key_lib::net::handle_client;
+use rus_key_lib::read_line::read_line;
 use clap::Parser;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::Mutex;
 
-pub struct Store {
-    url: String,
-}
-
 #[tokio::main]
 async fn main() {
     let db = Arc::new(Mutex::new(Db::new()));
     // init config
-    let config_map = init::init();
+    let config_map = init();
     println!("config: {:?}", config_map);
     db.lock().await.set(
         "ruskey_config".to_string(),

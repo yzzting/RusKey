@@ -1,4 +1,4 @@
-use rus_key_lib::command_trait::Command;
+use rus_key_trait::command_trait::Command;
 use config_commands::config::ConfigCommand;
 use expired_commands::expired::ExpiredCommand;
 use hashmap_commands::hashmap::HashMapCommand;

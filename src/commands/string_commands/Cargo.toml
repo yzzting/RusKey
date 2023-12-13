@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 bigdecimal = "0.4.2"
-rus_key_lib = { path = "../../lib" }
+rus_key_trait = { path = "../../trait" }
 
 # command crate
 expired_commands = { path = "../expired_commands" }

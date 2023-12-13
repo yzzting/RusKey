@@ -15,7 +15,8 @@ ping_commands = { version = "0.1.0", path = "src/commands/ping_commands" }
 utils_commands = { version = "0.1.0", path = "src/commands/utils_commands" }
 # lib crate
 rus_key_lib = { version = "0.1.0", path = "./src/lib" }
-factory = { version = "0.1.0", path = "./src/factory" }
+rus_key_trait = { version = "0.1.0", path = "./src/trait" }
+rus_key_factory = { version = "0.1.0", path = "./src/factory" }
 
 clap = { version = "4.4.6", features = ["derive"] }
 regex = "1.9.6"
@@ -32,6 +33,7 @@ rusty-hook = "0.11.2"
 members = [
     "src/lib",
     "src/factory",
+    "src/trait",
     "src/commands/string_commands",
     "src/commands/expired_commands",
     "src/commands/config_commands",

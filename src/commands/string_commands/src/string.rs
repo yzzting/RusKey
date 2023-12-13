@@ -1,5 +1,5 @@
-use rus_key_lib::command_trait::Command;
-use rus_key_lib::db::{Db, DataType};
+use rus_key_trait::command_trait::Command;
+use rus_key_trait::db_trait::{Db, DataType};
 use expired_commands::expired::{ExpiredCommand, get_key_expired};
 use crate::utils::{is_integer, general_command, get_value, get_parts, is_number, slice_from_end};
 use bigdecimal::BigDecimal;
@@ -46,7 +46,7 @@ impl StringCommand {
         StringCommand { command }
     }
 
-    fn append(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn append(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let (key, value) = get_parts(parts, true);
         return if !key.is_empty() && !value.is_empty() {
             let mut old_value = self.get(false, parts, &key, db);
@@ -62,7 +62,7 @@ impl StringCommand {
         }
     }
 
-    fn get_del(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn get_del(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let (key, _) = get_parts(parts, false);
         return if key != "" {
             let value = self.get(false, parts, &key, db);
@@ -76,7 +76,7 @@ impl StringCommand {
         }
     }
 
-    fn get_ex(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn get_ex(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let (key, _) = get_parts(parts, false);
         // ex px command
         let expired_command = ExpiredCommand::new("expired".to_string());
@@ -217,7 +217,7 @@ impl StringCommand {
         }
     }
 
-    fn get_set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn get_set(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let (key, value) = get_parts(parts, true);
 
         return if key != "" && value != "" {
@@ -234,7 +234,7 @@ impl StringCommand {
         }
     }
 
-    fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn set(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let (key, value) = get_parts(parts, true);
         // ex px command
         let expired_command = ExpiredCommand::new("expired".to_string());
@@ -409,7 +409,7 @@ impl StringCommand {
         is_parts: bool,
         parts: &mut SplitAsciiWhitespace,
         key: &str,
-        db: &mut Db,
+        db: &mut dyn Db,
     ) -> String {
         // if is_parts is true, get key from get_parts, else get key from key
         let key = if is_parts {
@@ -437,7 +437,7 @@ impl StringCommand {
     fn handle_accumulation(
         &self,
         parts: &mut SplitAsciiWhitespace,
-        db: &mut Db,
+        db: &mut dyn Db,
         accumulation: Accumulation,
         is_by: bool,
     ) -> String {
@@ -496,7 +496,7 @@ impl StringCommand {
         new_value.to_string()
     }
 
-    fn incrby_float(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn incrby_float(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         // TODO Increment of boundary values is not yet handled
         let (key, value) = get_parts(parts, true);
         if key == "" || value == "" {
@@ -531,7 +531,7 @@ impl StringCommand {
         new_value.to_string()
     }
 
-    fn get_range(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn get_range(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let (key, _) = get_parts(parts, false);
         if key == "" {
             return "GetRange Error: Key not specified".to_string();
@@ -558,7 +558,7 @@ impl StringCommand {
         return slice_from_end(&key_value, start, end);
     }
 
-    fn str_len(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn str_len(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let (key, _) = get_parts(parts, false);
         if key == "" {
             return "StrLen Error: Key not specified".to_string();
@@ -571,7 +571,7 @@ impl StringCommand {
         return key_as_str.len().to_string();
     }
 
-    fn set_gange(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn set_gange(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let (key, str_num) = get_parts(parts, true);
         let new_value = match parts.next() {
             Some(value) => value.to_string(),
@@ -617,7 +617,7 @@ impl StringCommand {
         len.to_string()
     }
 
-    fn mset(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn mset(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let mut key_value_vec: Vec<(String, String)> = Vec::new();
 
         while let Some(key) = parts.next() {
@@ -635,7 +635,7 @@ impl StringCommand {
         "OK".to_string()
     }
 
-    fn mget(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+    fn mget(&self, parts: &mut SplitAsciiWhitespace, db: &mut dyn Db) -> String {
         let mut key_vec: Vec<String> = Vec::new();
         while let Some(key) = parts.next() {
             let key = get_value(key.to_string(), parts);
@@ -654,7 +654,7 @@ impl Command for StringCommand {
     fn execute(
         &self,
         parts: &mut SplitAsciiWhitespace,
-        db: &mut Db,
+        db: &mut dyn Db,
     ) -> Result<String, &'static str> {
         match self.command.as_str() {
             "append" => Ok(self.append(parts, db)),

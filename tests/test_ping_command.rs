@@ -1,7 +1,6 @@
-use rus_key::command_trait::Command;
-use rus_key::db::Db;
-use rus_key::commands::ping::PingCommand;
-
+use ping_commands::ping::PingCommand;
+use rus_key_trait::command_trait::Command;
+use rus_key_lib::db::Db;
 #[test]
 fn test_ping_command() {
     let mut db = Db::new();

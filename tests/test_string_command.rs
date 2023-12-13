@@ -1,9 +1,9 @@
-use rus_key::command_trait::Command;
-use rus_key::db::DataType;
-use rus_key::db::Db;
-use rus_key::commands::expired::ExpiredCommand;
-use rus_key::commands::string::StringCommand;
-use rus_key::commands::utils::UtilsCommand;
+use rus_key_trait::command_trait::Command;
+use rus_key_lib::db::{DataType, Db};
+use expired_commands::expired::ExpiredCommand;
+use string_commands::string::StringCommand;
+use utils_commands::utils::UtilsCommand;
+
 use std::error::Error;
 
 fn get_current_time() -> i64 {
