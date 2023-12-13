@@ -14,6 +14,7 @@ hashmap_commands = { version = "0.1.0", path = "src/commands/hashmap_commands" }
 ping_commands = { version = "0.1.0", path = "src/commands/ping_commands" }
 utils_commands = { version = "0.1.0", path = "src/commands/utils_commands" }
 # lib crate
+rus_key_db = { version = "0.1.0", path = "./src/db" }
 rus_key_lib = { version = "0.1.0", path = "./src/lib" }
 rus_key_trait = { version = "0.1.0", path = "./src/trait" }
 rus_key_factory = { version = "0.1.0", path = "./src/factory" }
@@ -31,6 +32,7 @@ rusty-hook = "0.11.2"
 
 [workspace]
 members = [
+    "src/db",
     "src/lib",
     "src/factory",
     "src/trait",
