@@ -12,6 +12,7 @@ expired_commands = { version = "0.1.0", path = "./src/commands/expired_commands"
 config_commands = { version = "0.1.0", path = "./src/commands/config_commands" }
 hashmap_commands = { version = "0.1.0", path = "src/commands/hashmap_commands" }
 ping_commands = { version = "0.1.0", path = "src/commands/ping_commands" }
+utils_commands = { version = "0.1.0", path = "src/commands/utils_commands" }
 # lib crate
 rus_key_lib = { version = "0.1.0", path = "./src/lib" }
 clap = { version = "4.4.6", features = ["derive"] }
@@ -33,4 +34,5 @@ members = [
     "src/commands/config_commands",
     "src/commands/hashmap_commands",
     "src/commands/ping_commands",
+    "src/commands/utils_commands",
 ]
