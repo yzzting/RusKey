@@ -235,6 +235,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acbf1af155f9b9ef647e42cdc158db4b64a1b61f743629225fde6f3e0be2a7c7"
 
 [[package]]
+name = "config_commands"
+version = "0.1.0"
+dependencies = [
+ "rus_key_lib",
+]
+
+[[package]]
 name = "core-foundation-sys"
 version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -639,6 +646,7 @@ dependencies = [
  "bigdecimal",
  "chrono",
  "clap",
+ "config_commands",
  "expired_commands",
  "rand",
  "regex",
