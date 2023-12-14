@@ -1,3 +1,7 @@
+use lazy_static::lazy_static;
+use bigdecimal::BigDecimal;
+use std::str::FromStr;
+
 pub const EMPTY: &str = "nil";
 
 pub enum Accumulation {
@@ -27,4 +31,9 @@ pub struct ExtraArgs {
 pub enum SetError {
     InvalidExpiredTime,
     KeyOfValueNotSpecified,
+}
+
+lazy_static! {
+    pub static ref MIN_VALUE: BigDecimal = BigDecimal::from_str("-1.7E308").unwrap();
+    pub static ref MAX_VALUE: BigDecimal = BigDecimal::from_str("1.7E308").unwrap();
 }

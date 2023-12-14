@@ -11,7 +11,7 @@ use crate::get_set::get_set;
 use crate::set::set;
 use crate::mset::mset;
 use crate::mget::mget;
-use crate::set_gange::set_gange;
+use crate::set_range::set_range;
 use crate::str_len::str_len;
 use crate::r#const::Accumulation;
 use std::str::SplitAsciiWhitespace;
@@ -47,7 +47,7 @@ impl Command for StringCommand {
             "set" => Ok(set(parts, db)),
             "mset" => Ok(mset(parts, db)),
             "mget" => Ok(mget(parts, db)),
-            "setrange" => Ok(set_gange(parts, db)),
+            "setrange" => Ok(set_range(parts, db)),
             "strlen" => Ok(str_len(parts, db)),
             _ => Err("StringCommand Error: Command not found"),
         }

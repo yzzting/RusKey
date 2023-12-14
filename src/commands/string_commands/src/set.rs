@@ -6,6 +6,27 @@ use crate::utils::general_command;
 use crate::get::get;
 use crate::r#const::{ExtraArgs, SetError};
 
+/// Sets the value of a key in the database with various options.
+///
+/// This function is designed to set the value of a key in a database with various options. It takes two parameters:
+/// - `parts`: A mutable reference to a `SplitAsciiWhitespace` iterator. This is used to parse the command and its arguments.
+/// - `db`: A mutable reference to a `Db` instance. This is the database where the value is set.
+///
+/// The function first retrieves the key and the value from the `parts` iterator. If no key or value is provided, it returns an error message.
+///
+/// Next, it parses all remaining arguments. If the arguments include "ex", "px", "exat", or "pxat", it increments a counter. If the arguments include "nx" or "xx", it sets the corresponding field in `extra_args` to `Some(true)`.
+///
+/// The function then checks if "ex", "px", "exat", and "pxat" exist simultaneously, or if "nx" and "xx" exist simultaneously. If they do, it returns an error message.
+///
+/// The function also checks if the key exists when "nx" is specified, or if the key does not exist when "xx" is specified. If these conditions are not met, it returns an error message.
+///
+/// If the key is not empty, the function retrieves the old value of the key from the database. If the old value is not empty and `extra_args.get` is `Some(true)`, it sets `return_value` to the old value.
+///
+/// The function then sets the value in the database. If `extra_args.ex`, `extra_args.px`, `extra_args.exat`, or `extra_args.pxat` is `Some`, it calls the `general_command` function to handle the corresponding command. If the result is not "OK", it sets `error_str` to `Some(SetError::InvalidExpiredTime)`.
+///
+/// If the key is not expired and no expired time argument is provided, and `extra_args.keepttl` is `None`, the function sets the expired time to nil.
+///
+/// Finally, the function checks if `error_str` is `Some`. If it is, it returns an error message. Otherwise, it returns `return_value`.
 pub fn set(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
     let (key, value) = get_parts(parts, true);
     // ex px command

@@ -10,7 +10,7 @@ mod get_range;
 mod get_set;
 mod set;
 mod mset;
-mod set_gange;
+mod set_range;
 mod str_len;
 mod mget;
 mod handle_accumulation;
