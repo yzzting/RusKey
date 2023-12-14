@@ -4,6 +4,18 @@ use rus_key_db::db::{DataType, Db};
 use rus_key_command_lib::get_parts;
 use crate::r#const::EMPTY;
 
+/// This function retrieves a value from the database based on the provided key.
+///
+/// # Arguments
+///
+/// * `is_parts` - A boolean that indicates whether the key should be retrieved from `parts` or not.
+/// * `parts` - A mutable reference to a `SplitAsciiWhitespace` object. If `is_parts` is true, the key is retrieved from this object.
+/// * `key` - A string slice that represents the key. If `is_parts` is false, this key is used to retrieve the value.
+/// * `db` - A mutable reference to the `Db` object that represents the database.
+///
+/// # Returns
+///
+/// * A string that represents the value retrieved from the database. If the key does not exist, the key is expired, or the data type is incorrect, it returns a predefined `EMPTY` string.
 pub fn get(
     is_parts: bool,
     parts: &mut SplitAsciiWhitespace,
