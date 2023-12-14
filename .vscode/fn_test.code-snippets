@@ -1,0 +1,30 @@
+{
+	"RusKey Test Case": {
+		"scope": "rust",
+		"prefix": ["test", "test-case"],
+		"body": [
+			"#[test]",
+			"fn ${name}() -> Result<(), Box<dyn Error>> {",
+				"\tlet mut db = Db::new();",
+				"\tlet tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![];",
+				"\tfor (args, key, expected_result, expected_value, command) in tests_case {",
+					"\t\tprintln!(",
+						"\t\t\t\"arg: {}, key: {}, expected_result: {}, expected_value: {}\",",
+						"\t\t\targs, key, expected_result, expected_value",
+					"\t\t);",
+					"\t\tassert_command(",
+						"\t\t\t&mut db,",
+						"\t\t\tcommand,",
+						"\t\t\targs,",
+						"\t\t\tkey,",
+						"\t\t\texpected_result,",
+						"\t\t\texpected_value,",
+						"\t\t\tNone,",
+						"\t\t\tNone,",
+					"\t\t)?;",
+				"\t}",
+				"\tOk(())",
+			"}"
+		]
+	}
+}

@@ -1,7 +1,6 @@
-use rus_key::db::Db;
-use rus_key::func::hashmap::HashMapCommand;
-use rus_key::command_factory::Command;
-
+use hashmap_commands::hashmap::HashMapCommand;
+use rus_key_trait::command_trait::Command;
+use rus_key_db::db::Db;
 #[test]
 fn test_hmset_command() {
     let mut db = Db::new();

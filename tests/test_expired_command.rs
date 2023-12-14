@@ -1,7 +1,7 @@
-use rus_key::db::Db;
-use rus_key::func::expired::ExpiredCommand;
-use rus_key::func::string::StringCommand;
-use rus_key::command_factory::Command;
+use expired_commands::expired::ExpiredCommand;
+use string_commands::string::StringCommand;
+use rus_key_trait::command_trait::Command;
+use rus_key_db::db::Db;
 
 fn set_key(db: &mut Db) {
     // set expired key
@@ -81,7 +81,6 @@ fn test_pexpireat_command() {
     pexpire_command(&mut db);
 }
 
-
 fn ttl_command(db: &mut Db, command: &str, key: &str) -> i64 {
     let command_ttl = ExpiredCommand::new(command.to_string());
     let command_ttl_str = key;
@@ -98,7 +97,7 @@ fn test_ttl_command() {
     // ttl key does not exist
     let ttl_test_result = ttl_command(&mut db, "ttl", "test");
     assert_eq!(ttl_test_result, -2);
-    
+
     // ttl key exist and not expired
     let ttl_key_result = ttl_command(&mut db, "ttl", "key_not_expired");
     assert_eq!(ttl_key_result, -1);
@@ -108,7 +107,6 @@ fn test_ttl_command() {
     assert!(0 < ttl_result && ttl_result <= 1000);
 }
 
-
 #[test]
 fn test_pttl_command() {
     let mut db = Db::new();
@@ -117,7 +115,7 @@ fn test_pttl_command() {
     // pttl key does not exist
     let pttl_test_result = ttl_command(&mut db, "pttl", "test");
     assert_eq!(pttl_test_result, -2);
-    
+
     // pttl key exist and not expired
     let pttl_key_result = ttl_command(&mut db, "pttl", "key_not_expired");
     assert_eq!(pttl_key_result, -1);
