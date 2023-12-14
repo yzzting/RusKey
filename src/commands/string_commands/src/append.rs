@@ -2,7 +2,7 @@ use std::str::SplitAsciiWhitespace;
 use rus_key_db::db::{DataType, Db};
 use crate::get::get;
 use crate::r#const::EMPTY;
-use crate::utils::get_parts;
+use rus_key_command_lib::get_parts;
 
 pub fn append(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
     let (key, value) = get_parts(parts, true);

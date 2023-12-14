@@ -5,7 +5,7 @@ use std::str::FromStr;
 use rus_key_db::db::{DataType, Db};
 use crate::get::get;
 use crate::r#const::EMPTY;
-use crate::utils::{get_parts, is_number};
+use rus_key_command_lib::{get_parts, is_number};
 
 pub fn incrby_float(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
     // TODO Increment of boundary values is not yet handled

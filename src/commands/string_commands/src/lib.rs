@@ -13,3 +13,4 @@ mod mset;
 mod set_gange;
 mod str_len;
 mod mget;
+mod handle_accumulation;

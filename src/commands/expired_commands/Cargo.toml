@@ -9,5 +9,7 @@ edition = "2021"
 chrono = { version = "0.4", features = ["serde"] }
 # db crate
 rus_key_db = { path = "../../db" }
+# utils crate
+rus_key_command_lib = { path = "../command_lib" }
 # trait crate
 rus_key_trait = { path = "../../trait" }

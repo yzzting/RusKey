@@ -2,7 +2,7 @@ use std::str::SplitAsciiWhitespace;
 use rus_key_db::db::Db;
 use crate::get::get;
 use crate::r#const::EMPTY;
-use crate::utils::get_parts;
+use rus_key_command_lib::get_parts;
 
 pub fn get_del(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
     let (key, _) = get_parts(parts, false);

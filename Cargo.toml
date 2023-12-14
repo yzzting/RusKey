@@ -13,6 +13,7 @@ config_commands = { version = "0.1.0", path = "./src/commands/config_commands" }
 hashmap_commands = { version = "0.1.0", path = "src/commands/hashmap_commands" }
 ping_commands = { version = "0.1.0", path = "src/commands/ping_commands" }
 utils_commands = { version = "0.1.0", path = "src/commands/utils_commands" }
+rus_key_command_lib = { version = "0.1.0", path = "./src/commands/command_lib" }
 # lib crate
 rus_key_db = { version = "0.1.0", path = "./src/db" }
 rus_key_lib = { version = "0.1.0", path = "./src/lib" }
@@ -36,6 +37,7 @@ members = [
     "src/lib",
     "src/factory",
     "src/trait",
+    "src/commands/command_lib",
     "src/commands/string_commands",
     "src/commands/expired_commands",
     "src/commands/config_commands",

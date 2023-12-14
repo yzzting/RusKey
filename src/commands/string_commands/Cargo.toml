@@ -11,6 +11,9 @@ bigdecimal = "0.4.2"
 # db crate
 rus_key_db = { path = "../../db" }
 
+# utils crate
+rus_key_command_lib = { path = "../command_lib" }
+
 # trait crate
 rus_key_trait = { path = "../../trait" }
 

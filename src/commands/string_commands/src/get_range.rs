@@ -2,7 +2,7 @@ use std::str::SplitAsciiWhitespace;
 use rus_key_db::db::Db;
 use crate::get::get;
 use crate::r#const::EMPTY;
-use crate::utils::{get_parts, slice_from_end};
+use rus_key_command_lib::{get_parts, slice_from_end};
 
 pub fn get_range(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
     let (key, _) = get_parts(parts, false);

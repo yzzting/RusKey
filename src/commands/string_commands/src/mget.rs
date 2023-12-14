@@ -1,7 +1,7 @@
 use std::str::SplitAsciiWhitespace;
 use rus_key_db::db::Db;
 use crate::get::get;
-use crate::utils::get_value;
+use rus_key_command_lib::get_value;
 
 pub fn mget(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
     let mut key_vec: Vec<String> = Vec::new();

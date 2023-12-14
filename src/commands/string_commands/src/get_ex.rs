@@ -2,8 +2,9 @@ use std::str::SplitAsciiWhitespace;
 use expired_commands::expired::ExpiredCommand;
 use rus_key_db::db::Db;
 use crate::get::get;
+use crate::utils::general_command;
 use crate::r#const::{EMPTY, GetExExtraArgs, SetError};
-use crate::utils::{general_command, get_parts};
+use rus_key_command_lib::get_parts;
 
 pub fn get_ex(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
     let (key, _) = get_parts(parts, false);

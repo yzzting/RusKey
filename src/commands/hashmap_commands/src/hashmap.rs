@@ -1,9 +1,8 @@
-use std::collections::BTreeMap;
 use std::str::SplitAsciiWhitespace;
-
 use rus_key_trait::command_trait::Command;
-use rus_key_db::db::{Db, DataType};
-use expired_commands::expired::get_key_expired;
+use rus_key_db::db::Db;
+use crate::hgetall::hgetall;
+use crate::hmset::hmset;
 
 pub struct HashMapCommand {
     command: String,
@@ -12,52 +11,6 @@ pub struct HashMapCommand {
 impl HashMapCommand {
     pub fn new(command: String) -> HashMapCommand {
         HashMapCommand { command }
-    }
-
-    fn hmset(&self, parts: &mut SplitAsciiWhitespace, db: &mut Db) -> Result<String, &'static str> {
-        let key = match parts.next() {
-            Some(key) => key,
-            None => return Err("Key not specified"),
-        };
-        let mut btree_map = BTreeMap::new();
-        while let Some(field) = parts.next() {
-            let value = match parts.next() {
-                Some(value) => value,
-                None => return Err("Value not specified"),
-            };
-            btree_map.insert(field.to_string(), value.to_string());
-        }
-        db.set(key.to_string(), DataType::ZSet(btree_map));
-        Ok("OK".to_string())
-    }
-
-    fn hgetall(
-        &self,
-        parts: &mut SplitAsciiWhitespace,
-        db: &mut Db,
-    ) -> Result<String, &'static str> {
-        let key = match parts.next() {
-            Some(key) => key,
-            None => return Err("Key not specified"),
-        };
-        // check expired
-        let expired = get_key_expired(Some(key), db);
-        if !expired.is_empty() && expired != "nil" {
-            return Err("There is no such key, the key is expired, or the data type is incorrect");
-        }
-        if expired == "nil" {
-            return Err("nil");
-        }
-        match db.get(key) {
-            Some(DataType::ZSet(btree_map)) => {
-                let mut result = String::new();
-                for (field, value) in btree_map {
-                    result.push_str(&format!("{}: {} ", field, value));
-                }
-                Ok(result.trim().to_string())
-            }
-            _ => Err("There is no such key, the key is expired, or the data type is incorrect"),
-        }
     }
 }
 
@@ -68,8 +21,8 @@ impl Command for HashMapCommand {
         db: &mut Db,
     ) -> Result<String, &'static str> {
         match self.command.as_str() {
-            "hmset" => self.hmset(parts, db),
-            "hgetall" => self.hgetall(parts, db),
+            "hmset" => hmset(parts, db),
+            "hgetall" => hgetall(parts, db),
             _ => Err("HashMapCommand Error: Command not found"),
         }
     }
