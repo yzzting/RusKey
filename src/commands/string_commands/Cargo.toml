@@ -1,0 +1,21 @@
+[package]
+name = "string_commands"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bigdecimal = "0.4.2"
+
+# db crate
+rus_key_db = { path = "../../db" }
+
+# utils crate
+rus_key_command_lib = { path = "../command_lib" }
+
+# trait crate
+rus_key_trait = { path = "../../trait" }
+
+# command crate
+expired_commands = { path = "../expired_commands" }

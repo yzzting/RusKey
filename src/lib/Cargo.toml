@@ -1,0 +1,22 @@
+[package]
+name = "rus_key_lib"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.4.6", features = ["derive"] }
+regex = "1.9.6"
+rustyline = "12.0.0"
+tokio = { version = "1.32.0", features = ["full"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# db crate
+rus_key_db = { path = "../db" }
+
+# trait crate
+rus_key_trait = { path = "../trait" }
+
+# factory crate
+rus_key_factory = { path = "../factory" }

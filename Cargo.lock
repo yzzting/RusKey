@@ -235,6 +235,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acbf1af155f9b9ef647e42cdc158db4b64a1b61f743629225fde6f3e0be2a7c7"
 
 [[package]]
+name = "config_commands"
+version = "0.1.0"
+dependencies = [
+ "rus_key_db",
+ "rus_key_trait",
+]
+
+[[package]]
 name = "core-foundation-sys"
 version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -278,6 +286,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "expired_commands"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rus_key_command_lib",
+ "rus_key_db",
+ "rus_key_trait",
+]
+
+[[package]]
 name = "fd-lock"
 version = "3.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -304,6 +322,15 @@ name = "gimli"
 version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6fb8d784f27acf97159b40fc4db5ecd8aa23b9ad5ef69cdd136d3bc80665f0c0"
+
+[[package]]
+name = "hashmap_commands"
+version = "0.1.0"
+dependencies = [
+ "expired_commands",
+ "rus_key_db",
+ "rus_key_trait",
+]
 
 [[package]]
 name = "heck"
@@ -523,6 +550,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8afb450f006bf6385ca15ef45d71d2288452bc3683ce2e2cacc0d18e4be60b58"
 
 [[package]]
+name = "ping_commands"
+version = "0.1.0"
+dependencies = [
+ "rus_key_db",
+ "rus_key_trait",
+]
+
+[[package]]
 name = "ppv-lite86"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -631,10 +666,66 @@ dependencies = [
  "bigdecimal",
  "chrono",
  "clap",
+ "config_commands",
+ "expired_commands",
+ "hashmap_commands",
+ "ping_commands",
  "rand",
  "regex",
+ "rus_key_command_lib",
+ "rus_key_db",
+ "rus_key_factory",
+ "rus_key_lib",
+ "rus_key_trait",
+ "rustyline",
+ "string_commands",
+ "tokio",
+ "utils_commands",
+]
+
+[[package]]
+name = "rus_key_command_lib"
+version = "0.1.0"
+
+[[package]]
+name = "rus_key_db"
+version = "0.1.0"
+dependencies = [
+ "rand",
+]
+
+[[package]]
+name = "rus_key_factory"
+version = "0.1.0"
+dependencies = [
+ "config_commands",
+ "expired_commands",
+ "hashmap_commands",
+ "ping_commands",
+ "rus_key_trait",
+ "string_commands",
+ "utils_commands",
+]
+
+[[package]]
+name = "rus_key_lib"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "regex",
+ "rus_key_db",
+ "rus_key_factory",
+ "rus_key_trait",
  "rustyline",
  "tokio",
+]
+
+[[package]]
+name = "rus_key_trait"
+version = "0.1.0"
+dependencies = [
+ "rus_key_db",
 ]
 
 [[package]]
@@ -737,6 +828,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e08d8363704e6c71fc928674353e6b7c23dcea9d82d7012c8faf2a3a025f8d0"
 
 [[package]]
+name = "string_commands"
+version = "0.1.0"
+dependencies = [
+ "bigdecimal",
+ "expired_commands",
+ "rus_key_command_lib",
+ "rus_key_db",
+ "rus_key_trait",
+]
+
+[[package]]
 name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -806,6 +908,14 @@ name = "utf8parse"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
+
+[[package]]
+name = "utils_commands"
+version = "0.1.0"
+dependencies = [
+ "rus_key_db",
+ "rus_key_trait",
+]
 
 [[package]]
 name = "wasi"

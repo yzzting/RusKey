@@ -1,7 +1,7 @@
-use rus_key::command_factory::Command;
-use rus_key::db::{DataType, Db};
-use rus_key::commands::config::ConfigCommand;
-use rus_key::init;
+use rus_key_trait::command_trait::Command;
+use rus_key_db::db::{DataType, Db};
+use config_commands::config::ConfigCommand;
+use rus_key_lib::init;
 
 #[test]
 fn test_config_get_command() {
