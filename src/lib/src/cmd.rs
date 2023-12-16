@@ -12,7 +12,7 @@ pub fn handle_command(
         Some(cmd) => cmd.to_lowercase(),
         None => return Err("No command"),
     };
-
+    println!("Command: {}", cmd);
     match factory.create(&cmd) {
         Some(command) => command.execute(parts, db),
         None => Err("Invalid command!"),
