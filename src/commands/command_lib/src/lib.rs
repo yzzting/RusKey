@@ -142,3 +142,55 @@ pub fn slice_from_end(str: &str, start: isize, end: isize) -> String {
     };
     char_vec[start..end].iter().collect::<String>()
 }
+
+// LCS func
+/// Returns the longest common substring of two strings.
+///
+/// This function takes two strings as arguments and returns the longest common substring of the two strings.
+/// It does this by first creating a matrix of the lengths of the longest common substrings of the two strings.
+/// It then iterates over the matrix to find the longest common substring.
+///
+/// # Arguments
+///
+/// * `str1` - The first string.
+/// * `str2` - The second string.
+///
+/// # Returns
+///
+/// * A string that is the longest common substring of the two strings.
+pub fn fn_lcs(str1: &str, str2: &str) -> String {
+    let x_chars: Vec<char> = str1.chars().collect();
+    let y_chars: Vec<char> = str2.chars().collect();
+    let m = x_chars.len();
+    let n = y_chars.len();
+
+    let mut dp: Vec<Vec<usize>> = vec![vec![0; n + 1]; m + 1];
+
+    for i in 1..=m {
+        for j in 1..=n {
+            if x_chars[i - 1] == y_chars[j - 1] {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+            } else {
+                dp[i][j] = dp[i - 1][j].max(dp[i][j - 1])
+            }
+        }
+    }
+
+    let mut lcs = String::new();
+    let mut i = m;
+    let mut j = n;
+
+    while i > 0 && j > 0 {
+        if x_chars[i - 1] == y_chars[j - 1] {
+            lcs.push(x_chars[i - 1]);
+            i -= 1;
+            j -= 1;
+        } else if dp[i - 1][j] > dp[i][j - 1] {
+            i -= 1;
+        } else {
+            j -= 1;
+        }
+    }
+
+    lcs.chars().rev().collect::<String>()
+}
