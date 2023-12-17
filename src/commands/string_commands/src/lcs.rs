@@ -21,7 +21,25 @@ pub fn lcs(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
     }
 
     // Call the fn_lcs function from the command_lib crate.
-    fn_lcs(&value1, &value2)
+    let (lcs_str, lcs_len) = fn_lcs(&value1, &value2);
+    let mut result_str = lcs_str;
+    let mut err_count = 0;
+    while let Some(arg) = parts.next() {
+        let lower_arg = arg.to_lowercase();
+        match lower_arg.as_str() {
+            "len" => {
+                err_count += 1;
+                result_str = lcs_len.to_string();
+            }
+            // TODO add idx The implementation of idx is too difficult
+            _ => {}
+        }
+    }
 
-    // TODO handle extra arguments
+    // IDX and LEN not be able to exist in the same time
+    if err_count > 1 {
+        return "ERR wrong number of arguments for command".to_string();
+    }
+
+    result_str
 }

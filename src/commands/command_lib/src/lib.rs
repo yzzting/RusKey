@@ -158,7 +158,8 @@ pub fn slice_from_end(str: &str, start: isize, end: isize) -> String {
 /// # Returns
 ///
 /// * A string that is the longest common substring of the two strings.
-pub fn fn_lcs(str1: &str, str2: &str) -> String {
+/// * An integer that is the length of the longest common substring of the two strings.
+pub fn fn_lcs(str1: &str, str2: &str) -> (String, usize) {
     let x_chars: Vec<char> = str1.chars().collect();
     let y_chars: Vec<char> = str2.chars().collect();
     let m = x_chars.len();
@@ -192,5 +193,5 @@ pub fn fn_lcs(str1: &str, str2: &str) -> String {
         }
     }
 
-    lcs.chars().rev().collect::<String>()
+    (lcs.chars().rev().collect::<String>(), dp[m][n])
 }
