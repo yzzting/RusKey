@@ -1,6 +1,6 @@
-use rus_key_trait::command_trait::Command;
-use rus_key_db::db::{DataType, Db};
 use expired_commands::expired::ExpiredCommand;
+use rus_key_db::db::{DataType, Db};
+use rus_key_trait::command_trait::Command;
 use string_commands::string::StringCommand;
 use utils_commands::utils::UtilsCommand;
 
@@ -1544,7 +1544,13 @@ fn test_mget_command() -> Result<(), Box<dyn Error>> {
     let mset_command = StringCommand::new("mset".to_string());
     let mget_command = StringCommand::new("mget".to_string());
     let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
-        ("key1 value1 key2 value2", "key1 key2", "OK", "", &mset_command),
+        (
+            "key1 value1 key2 value2",
+            "key1 key2",
+            "OK",
+            "",
+            &mset_command,
+        ),
         ("key1 key2", "key1 key2", "value1 value2", "", &mget_command),
         (
             "key1 value1 key2 value2 key3 value3",
@@ -1553,7 +1559,13 @@ fn test_mget_command() -> Result<(), Box<dyn Error>> {
             "",
             &mset_command,
         ),
-        ("key1 key2 key3", "key1 key2 key3", "value1 value2 value3", "", &mget_command),
+        (
+            "key1 key2 key3",
+            "key1 key2 key3",
+            "value1 value2 value3",
+            "",
+            &mget_command,
+        ),
         (
             "key1 \"Hello value1\" key2 \"Hello value2\" key3 \"Hello value3\"",
             "key1 key2 key3",
@@ -1581,6 +1593,67 @@ fn test_mget_command() -> Result<(), Box<dyn Error>> {
             "nil nil nil",
             "",
             &mget_command,
+        ),
+    ];
+    for (args, key, expected_result, expected_value, command) in tests_case {
+        println!(
+            "arg: {}, key: {}, expected_result: {}, expected_value: {}",
+            args, key, expected_result, expected_value
+        );
+        assert_command(
+            &mut db,
+            command,
+            args,
+            key,
+            expected_result,
+            expected_value,
+            None,
+            None,
+        )?;
+    }
+    Ok(())
+}
+
+#[test]
+fn test_lcs_command() -> Result<(), Box<dyn Error>> {
+    let mut db = Db::new();
+
+    let lcs_command = StringCommand::new("lcs".to_string());
+    let mset_command = StringCommand::new("mset".to_string());
+    let mget_command = StringCommand::new("mget".to_string());
+
+    let tests_case: Vec<(&str, &str, &str, &str, &StringCommand)> = vec![
+        (
+            "key1 value1 key2 value2",
+            "key1 key2",
+            "OK",
+            "",
+            &mset_command,
+        ),
+        ("key1 key2", "key1 key2", "value1 value2", "", &mget_command),
+        ("key1 key2", "key1 key2", "value", "", &lcs_command),
+        ("key1 key2 LEN", "key1 key2", "5", "", &lcs_command),
+        (
+            "key1 ohmytext key2 mynewtext",
+            "key1 key2",
+            "OK",
+            "",
+            &mset_command,
+        ),
+        (
+            "key1 key2",
+            "key1 key2",
+            "ohmytext mynewtext",
+            "",
+            &mget_command,
+        ),
+        ("key1 key2", "key1 key2", "mytext", "", &lcs_command),
+        (
+            "key1",
+            "",
+            "ERR wrong number of arguments for command",
+            "",
+            &lcs_command,
         ),
     ];
     for (args, key, expected_result, expected_value, command) in tests_case {

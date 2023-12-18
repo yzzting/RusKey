@@ -1,9 +1,9 @@
+use crate::init::Store;
+use crate::stream::Client;
+use rus_key_factory::command_init::init_commands;
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
 use std::process;
-use crate::stream::Client;
-use crate::init::Store;
-use crate::init_commands::init_commands;
 
 async fn send_command(command: &str, state: &Store) {
     let mut client = Client::new(&state.url).await.unwrap();

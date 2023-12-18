@@ -1,19 +1,20 @@
-use rus_key_trait::command_trait::Command;
-use rus_key_db::db::Db;
 use crate::append::append;
-use crate::handle_accumulation::handle_accumulation;
-use crate::incrby_float::incrby_float;
 use crate::get::get;
 use crate::get_del::get_del;
 use crate::get_ex::get_ex;
 use crate::get_range::get_range;
 use crate::get_set::get_set;
-use crate::set::set;
-use crate::mset::mset;
+use crate::handle_accumulation::handle_accumulation;
+use crate::incrby_float::incrby_float;
+use crate::lcs::lcs;
 use crate::mget::mget;
+use crate::mset::mset;
+use crate::r#const::Accumulation;
+use crate::set::set;
 use crate::set_range::set_range;
 use crate::str_len::str_len;
-use crate::r#const::Accumulation;
+use rus_key_db::db::Db;
+use rus_key_trait::command_trait::Command;
 use std::str::SplitAsciiWhitespace;
 
 pub struct StringCommand {
@@ -48,6 +49,7 @@ impl Command for StringCommand {
             "mset" => Ok(mset(parts, db)),
             "mget" => Ok(mget(parts, db)),
             "setrange" => Ok(set_range(parts, db)),
+            "lcs" => Ok(lcs(parts, db)),
             "strlen" => Ok(str_len(parts, db)),
             _ => Err("StringCommand Error: Command not found"),
         }
