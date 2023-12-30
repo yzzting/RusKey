@@ -20,7 +20,8 @@ impl Command for ListCommand {
         db: &mut Db,
     ) -> Result<String, &'static str> {
         match self.command.as_str() {
-            "lpush" => Ok(list_push(parts, db)),
+            "lpush" => Ok(list_push(parts, db, false)),
+            "lpushx" => Ok(list_push(parts, db, true)),
             _ => Err("ListCommand Error: Command not found"),
         }
     }

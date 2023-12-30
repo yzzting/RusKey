@@ -4,7 +4,7 @@ use rus_key_db::db::Db;
 use std::collections::VecDeque;
 use std::str::SplitAsciiWhitespace;
 
-pub fn list_push(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
+pub fn list_push(parts: &mut SplitAsciiWhitespace, db: &mut Db, is_x: bool) -> String {
     let (key, _) = get_parts(parts, false);
     let mut value_vec: VecDeque<String> = VecDeque::new();
     while let Some(value) = parts.next() {
@@ -18,6 +18,10 @@ pub fn list_push(parts: &mut SplitAsciiWhitespace, db: &mut Db) -> String {
         },
         None => VecDeque::new(),
     };
+
+    if is_x && !db.check_expired(&key) {
+        return "0".to_string();
+    }
 
     for value in value_vec {
         list.push_front(value);
