@@ -921,7 +921,7 @@ fn test_incrbyfloat_command() -> Result<(), Box<dyn Error>> {
         (
             "key_not_float abc",
             "key_not_float",
-            "Value is not an float or out of range",
+            "The value is not a valid float",
             "1",
             &incrbyfloat_command,
         ),
@@ -935,7 +935,7 @@ fn test_incrbyfloat_command() -> Result<(), Box<dyn Error>> {
         (
             "key_not_float 1.1",
             "key_not_float",
-            "Value is not an float or out of range",
+            "The value is not a valid float",
             "abc",
             &incrbyfloat_command,
         ),
@@ -1193,7 +1193,7 @@ fn test_getrange_command() -> Result<(), Box<dyn Error>> {
         (
             "non_existent_key 0 -2",
             "non_existent_key",
-            "",
+            "nil",
             "",
             &getrange_command,
         ),
