@@ -10,6 +10,7 @@ edition = "2021"
 config_commands = { path = "../commands/config_commands" }
 expired_commands = { path = "../commands/expired_commands" }
 hashmap_commands = { path = "../commands/hashmap_commands" }
+list_commands = { path = "../commands/list_commands" }
 ping_commands = { path = "../commands/ping_commands" }
 string_commands = { path = "../commands/string_commands" }
 utils_commands = { path = "../commands/utils_commands" }

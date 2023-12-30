@@ -1,12 +1,15 @@
-use rus_key_trait::command_trait::Command;
+use crate::command_init::{
+    EXPIRED_COMMANDS, HASHMAP_COMMANDS, LIST_COMMANDS, STRING_COMMANDS, UTILS_COMMANDS,
+};
 use config_commands::config::ConfigCommand;
 use expired_commands::expired::ExpiredCommand;
 use hashmap_commands::hashmap::HashMapCommand;
+use list_commands::list::ListCommand;
 use ping_commands::ping::PingCommand;
+use rus_key_trait::command_trait::Command;
+use std::collections::HashMap;
 use string_commands::string::StringCommand;
 use utils_commands::utils::UtilsCommand;
-use crate::command_init::{EXPIRED_COMMANDS, HASHMAP_COMMANDS, STRING_COMMANDS, UTILS_COMMANDS};
-use std::collections::HashMap;
 
 pub struct CommandFactory {
     commands: HashMap<String, Box<dyn Command>>,
@@ -33,6 +36,14 @@ impl CommandFactory {
             commands.insert(
                 command.to_string(),
                 Box::new(HashMapCommand::new(command.to_string())),
+            );
+        }
+
+        // List
+        for command in LIST_COMMANDS.iter() {
+            commands.insert(
+                command.to_string(),
+                Box::new(ListCommand::new(command.to_string())),
             );
         }
 

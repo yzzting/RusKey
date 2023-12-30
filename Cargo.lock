@@ -410,6 +410,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3852614a3bd9ca9804678ba6be5e3b8ce76dfc902cae004e3e0c44051b6e88db"
 
 [[package]]
+name = "list_commands"
+version = "0.1.0"
+dependencies = [
+ "rus_key_command_lib",
+ "rus_key_db",
+ "rus_key_trait",
+]
+
+[[package]]
 name = "lock_api"
 version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -675,6 +684,7 @@ dependencies = [
  "config_commands",
  "expired_commands",
  "hashmap_commands",
+ "list_commands",
  "ping_commands",
  "rand",
  "regex",
@@ -707,6 +717,7 @@ dependencies = [
  "config_commands",
  "expired_commands",
  "hashmap_commands",
+ "list_commands",
  "ping_commands",
  "rus_key_trait",
  "string_commands",

@@ -20,6 +20,7 @@ pub const STRING_COMMANDS: [&str; 17] = [
     "strlen",
 ];
 pub const HASHMAP_COMMANDS: [&str; 2] = ["hmset", "hgetall"];
+pub const LIST_COMMANDS: [&str; 1] = ["lpush"];
 pub const EXPIRED_COMMANDS: [&str; 6] =
     ["expired", "expireat", "pexpireat", "ttl", "pttl", "persist"];
 pub const UTILS_COMMANDS: [&str; 6] = ["rename", "renamenx", "randomkey", "del", "exists", "type"];
@@ -29,6 +30,7 @@ pub fn init_commands() -> HashSet<String> {
 
     commands_map.extend(STRING_COMMANDS.iter().map(|&s| s.to_string()));
     commands_map.extend(HASHMAP_COMMANDS.iter().map(|&s| s.to_string()));
+    commands_map.extend(LIST_COMMANDS.iter().map(|&s| s.to_string()));
     commands_map.extend(EXPIRED_COMMANDS.iter().map(|&s| s.to_string()));
     commands_map.extend(UTILS_COMMANDS.iter().map(|&s| s.to_string()));
 
