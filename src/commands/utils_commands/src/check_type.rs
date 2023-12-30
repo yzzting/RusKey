@@ -10,7 +10,7 @@ pub fn check_type(key: Option<&str>, db: &mut Db) -> String {
     }
     match db.get(key) {
         Some(DataType::String(_)) => "string".to_string(),
-        // Some(DataType::List(_)) => "list".to_string(),
+        Some(DataType::List(_)) => "list".to_string(),
         // Some(DataType::Set(_)) => "set".to_string(),
         Some(DataType::HashMap(_)) => "hash".to_string(),
         Some(DataType::ZSet(_)) => "zset".to_string(),

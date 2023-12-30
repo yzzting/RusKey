@@ -1,10 +1,10 @@
 use rand::Rng;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, VecDeque};
 
 #[derive(Debug, Clone)]
 pub enum DataType {
     String(String),
-    // List(Vec<String>),
+    List(VecDeque<String>),
     // Set(HashMap<String, String>),
     HashMap(HashMap<String, String>),
     ZSet(BTreeMap<String, String>),
